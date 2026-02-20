@@ -1,15 +1,21 @@
 // Main Navigator for authenticated users
-import React from 'react'
 import { createStackNavigator } from '@react-navigation/stack'
-import TabNavigator from './TabNavigator'
+import React from 'react'
+import LoginScreen from '../screens/auth/LoginScreen'
 import ProfileScreen from '../screens/auth/ProfileScreen'
+import RegisterScreen from '../screens/auth/RegisterScreen'
+import AdminScreen from '../screens/main/AdminScreen'
 import ContactScreen from '../screens/main/ContactScreen'
-import ServiceDetailScreen from '../screens/services/ServiceDetailScreen'
-import MentalWellnessScreen from '../screens/services/MentalWellnessScreen'
-import SpiritualGrowthScreen from '../screens/services/SpiritualGrowthScreen'
+import EventsScreen from '../screens/main/EventsScreen'
+import LiveScreen from '../screens/main/LiveScreen'
+import MyBookingsScreen from '../screens/main/MyBookingsScreen'
 import FinancialGuidanceScreen from '../screens/services/FinancialGuidanceScreen'
 import HypnotherapyScreen from '../screens/services/HypnotherapyScreen'
 import IntegratedServicesScreen from '../screens/services/IntegratedServicesScreen'
+import MentalWellnessScreen from '../screens/services/MentalWellnessScreen'
+import ServiceDetailScreen from '../screens/services/ServiceDetailScreen'
+import SpiritualGrowthScreen from '../screens/services/SpiritualGrowthScreen'
+import TabNavigator from './TabNavigator'
 
 const Stack = createStackNavigator()
 
@@ -22,6 +28,16 @@ const MainNavigator = () => {
       }}
     >
       <Stack.Screen name="Tabs" component={TabNavigator} />
+      <Stack.Screen 
+        name="Login" 
+        component={LoginScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen 
+        name="Register" 
+        component={RegisterScreen}
+        options={{ headerShown: false }}
+      />
       <Stack.Screen 
         name="Profile" 
         component={ProfileScreen}
@@ -85,6 +101,26 @@ const MainNavigator = () => {
           headerShown: true,
           title: 'Integrated Services',
         }}
+      />
+      <Stack.Screen 
+        name="Events" 
+        component={EventsScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen 
+        name="Live" 
+        component={LiveScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen 
+        name="Admin" 
+        component={AdminScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen 
+        name="MyBookings" 
+        component={MyBookingsScreen}
+        options={{ headerShown: false }}
       />
     </Stack.Navigator>
   )

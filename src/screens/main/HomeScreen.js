@@ -25,7 +25,7 @@ import { staticData } from '../../utils/staticData'
 const { width } = Dimensions.get('window')
 
 const HomeScreen = ({ navigation }) => {
-  const { user, getUserProfile } = useAuth()
+  const { user, getUserProfile, admin } = useAuth()
   const insets = useSafeAreaInsets()
   const [userProfile, setUserProfile] = useState(staticData.userProfile)
   const [loading, setLoading] = useState(false)
@@ -194,10 +194,57 @@ const HomeScreen = ({ navigation }) => {
     return <LoadingSpinner variant="gradient" text="Loading your journey..." />
   }
 
+  const isGuest = user?.isAnonymous || !user
+
   return (
     <View style={{ flex: 1, backgroundColor: Colors.background, paddingBottom: Math.max(insets.bottom, 12) }}>
-      <StatusBar style="light" />
-      
+      <StatusBar style="dark" />
+      {/* Top bar: Login or Profile */}
+      <View style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingHorizontal: 16,
+        paddingTop: Math.max(insets.top, 12),
+        paddingBottom: 10,
+        backgroundColor: Colors.surface,
+        borderBottomWidth: 1,
+        borderBottomColor: Colors.lightGray,
+      }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Image
+            source={require('../../../assets/icon.png')}
+            style={{ width: 32, height: 32, borderRadius: 8 }}
+            resizeMode="contain"
+          />
+          <Text style={{
+            ...Typography.textStyles.h6,
+            color: Colors.textPrimary,
+            marginLeft: 10,
+          }}>
+            Life Changing Journey
+          </Text>
+        </View>
+        <TouchableOpacity
+          onPress={() => navigation.navigate(isGuest ? 'Login' : 'Profile')}
+          style={{
+            backgroundColor: isGuest ? Colors.primary : Colors.primaryAlpha,
+            paddingVertical: 8,
+            paddingHorizontal: 16,
+            borderRadius: 20,
+            borderWidth: isGuest ? 0 : 1,
+            borderColor: Colors.primary,
+          }}
+          activeOpacity={0.9}
+        >
+          <Text style={{
+            ...Typography.textStyles.captionBold,
+            color: isGuest ? Colors.white : Colors.primary,
+          }}>
+            {isGuest ? 'Login' : 'Profile'}
+          </Text>
+        </TouchableOpacity>
+      </View>
 
       <ScrollView 
         style={{ flex: 1 }}
@@ -247,6 +294,79 @@ const HomeScreen = ({ navigation }) => {
             </Text>
           </View>
         </View>
+
+        {/* Quick actions: Events, My Bookings, Admin */}
+        <View style={{ marginBottom: 24, paddingHorizontal: 16 }}>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12, justifyContent: 'center' }}>
+            <TouchableOpacity
+              style={{
+                backgroundColor: Colors.surface,
+                borderRadius: 16,
+                padding: 16,
+                minWidth: 100,
+                alignItems: 'center',
+                borderWidth: 1,
+                borderColor: Colors.lightGray,
+              }}
+              onPress={() => navigation.navigate('Events')}
+              activeOpacity={0.9}
+            >
+              <Ionicons name="calendar" size={24} color={Colors.primary} />
+              <Text style={{ ...Typography.textStyles.captionBold, color: Colors.textPrimary, marginTop: 8 }}>Events</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={{
+                backgroundColor: Colors.surface,
+                borderRadius: 16,
+                padding: 16,
+                minWidth: 100,
+                alignItems: 'center',
+                borderWidth: 1,
+                borderColor: Colors.lightGray,
+              }}
+              onPress={() => navigation.navigate('MyBookings')}
+              activeOpacity={0.9}
+            >
+              <Ionicons name="book" size={24} color={Colors.primary} />
+              <Text style={{ ...Typography.textStyles.captionBold, color: Colors.textPrimary, marginTop: 8 }}>My Bookings</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={{
+                backgroundColor: Colors.surface,
+                borderRadius: 16,
+                padding: 16,
+                minWidth: 100,
+                alignItems: 'center',
+                borderWidth: 1,
+                borderColor: Colors.lightGray,
+              }}
+              onPress={() => navigation.navigate('Live')}
+              activeOpacity={0.9}
+            >
+              <Ionicons name="videocam" size={24} color={Colors.primary} />
+              <Text style={{ ...Typography.textStyles.captionBold, color: Colors.textPrimary, marginTop: 8 }}>Live</Text>
+            </TouchableOpacity>
+            {admin && (
+              <TouchableOpacity
+                style={{
+                  backgroundColor: Colors.surface,
+                  borderRadius: 16,
+                  padding: 16,
+                  minWidth: 100,
+                  alignItems: 'center',
+                  borderWidth: 1,
+                  borderColor: Colors.secondary,
+                }}
+                onPress={() => navigation.navigate('Admin')}
+                activeOpacity={0.9}
+              >
+                <Ionicons name="shield" size={24} color={Colors.secondary} />
+                <Text style={{ ...Typography.textStyles.captionBold, color: Colors.textPrimary, marginTop: 8 }}>Admin</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+
         {/* Featured Services - Main Focus */}
         <View style={{ marginBottom: 32, paddingTop: 20 }}>
           <View style={{ paddingHorizontal: 16, marginBottom: 20 }}>

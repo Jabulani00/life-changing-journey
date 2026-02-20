@@ -1,16 +1,16 @@
 // Profile Screen
-import React, { useState, useEffect } from 'react'
-import { View, Text, ScrollView, Alert } from 'react-native'
-import { StatusBar } from 'expo-status-bar'
 import { Ionicons } from '@expo/vector-icons'
-import { useAuth } from '../../context/AuthContext'
-import CustomInput from '../../components/common/CustomInput'
+import { StatusBar } from 'expo-status-bar'
+import React, { useEffect, useState } from 'react'
+import { Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native'
 import CustomButton from '../../components/common/CustomButton'
-import { GlobalStyles } from '../../styles/globalStyles'
+import CustomInput from '../../components/common/CustomInput'
+import { useAuth } from '../../context/AuthContext'
 import { Colors } from '../../styles/colors'
+import { GlobalStyles } from '../../styles/globalStyles'
 
 const ProfileScreen = ({ navigation }) => {
-  const { user, getUserProfile, updateProfile, signOut } = useAuth()
+  const { user, getUserProfile, updateProfile, signOut, admin } = useAuth()
   const [profile, setProfile] = useState({
     full_name: '',
     phone: '',
@@ -122,6 +122,38 @@ const ProfileScreen = ({ navigation }) => {
           value={profile.date_of_birth}
           onChangeText={(value) => setProfile({...profile, date_of_birth: value})}
         />
+
+        <TouchableOpacity
+          style={{
+            marginTop: 24,
+            padding: 16,
+            backgroundColor: Colors.surface,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: Colors.lightGray,
+          }}
+          onPress={() => navigation.navigate('MyBookings')}
+        >
+          <Text style={GlobalStyles.bodyText}>My Bookings</Text>
+          <Text style={GlobalStyles.captionText}>View your appointments</Text>
+        </TouchableOpacity>
+
+        {admin && (
+          <TouchableOpacity
+            style={{
+              marginTop: 12,
+              padding: 16,
+              backgroundColor: Colors.surface,
+              borderRadius: 12,
+              borderWidth: 1,
+              borderColor: Colors.secondary,
+            }}
+            onPress={() => navigation.navigate('Admin')}
+          >
+            <Text style={[GlobalStyles.bodyText, { color: Colors.secondary }]}>Admin</Text>
+            <Text style={GlobalStyles.captionText}>Post events & view bookings</Text>
+          </TouchableOpacity>
+        )}
 
         <CustomButton
           title="Update Profile"

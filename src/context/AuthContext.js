@@ -1,7 +1,8 @@
 // Authentication context for managing user state
-import React, { createContext, useState, useEffect, useContext } from 'react'
-import { supabase } from '../services/supabaseClient'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import React, { createContext, useContext, useEffect, useState } from 'react'
+import { isAdmin as checkFirebaseAdmin } from '../services/firebase'
+import { supabase } from '../services/supabaseClient'
 
 const AuthContext = createContext({})
 
@@ -9,7 +10,19 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
   const [session, setSession] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [admin, setAdmin] = useState(false)
+  // Login is optional by default (users can browse without signing in). Set EXPO_PUBLIC_ENABLE_AUTH=true to require login.
   const enableAuth = process.env.EXPO_PUBLIC_ENABLE_AUTH === 'true'
+
+  // Resolve admin role from Firebase config when user changes
+  useEffect(() => {
+    const email = user?.email ?? user?.user_metadata?.email
+    if (!email) {
+      setAdmin(false)
+      return
+    }
+    checkFirebaseAdmin(email).then(setAdmin).catch(() => setAdmin(false))
+  }, [user])
 
   useEffect(() => {
     // Get initial session
@@ -182,6 +195,7 @@ export const AuthProvider = ({ children }) => {
     user,
     session,
     loading,
+    admin,
     signUp,
     signIn,
     signOut,

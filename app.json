@@ -1,16 +1,52 @@
 {
   "expo": {
-    "name": "life-changing-journey",
+    "name": "Life Changing Journey",
     "slug": "life-changing-journey",
     "version": "1.0.0",
     "main": "index.js",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/icon.png",
     "scheme": "lifechangingjourney",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.lifechangingjourney.app",
+      "buildNumber": "1",
+      "deploymentTarget": "13.4",
+      "requireFullScreen": false,
+      "icon": "./assets/icon.png",
+      "splash": {
+        "image": "./assets/images/splash-icon.png",
+        "resizeMode": "contain",
+        "backgroundColor": "#ffffff",
+        "dark": {
+          "backgroundColor": "#000000"
+        }
+      },
+      "infoPlist": {
+        "NSPhoneUsageDescription": "This app needs access to make phone calls to contact our wellness services.",
+        "NSCameraUsageDescription": "This app needs camera access for profile photos and service documentation.",
+        "NSPhotoLibraryUsageDescription": "This app needs photo library access to select images for your profile.",
+        "NSLocationWhenInUseUsageDescription": "This app uses your location to help you find nearby wellness services.",
+        "LSApplicationQueriesSchemes": [
+          "tel",
+          "mailto",
+          "sms",
+          "whatsapp",
+          "https",
+          "http"
+        ],
+        "UIBackgroundModes": [],
+        "UIViewControllerBasedStatusBarAppearance": true,
+        "UIStatusBarStyle": "UIStatusBarStyleDefault",
+        "CFBundleDisplayName": "Life Changing Journey",
+        "CFBundleName": "Life Changing Journey"
+      },
+      "config": {
+        "usesNonExemptEncryption": false
+      },
+      "associatedDomains": []
     },
     "android": {
       "adaptiveIcon": {
@@ -42,6 +78,11 @@
     ],
     "experiments": {
       "reactCompiler": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "bc265066-d7a0-43c1-ae2c-d7d7a013bff8"
+      }
     }
   }
 }

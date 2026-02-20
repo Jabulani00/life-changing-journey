@@ -112,6 +112,18 @@ export const Colors = {
     background: 'rgba(216, 31, 98, 0.08)',
     text: '#8d1441'
   },
+
+  // Category key → primary color (for Colors.services[category] in BookingScreen, ServiceCard, etc.)
+  services: {
+    mental_wellness: '#0097A7',
+    spiritual_growth: '#E6A623',
+    financial_guidance: '#3A7F3D',
+    hypnotherapy: '#D81F62',
+    psychology: '#6B1636',
+    consulting: '#012630',
+    integrated_services: '#012630',
+    education: '#0097A7',
+  },
   
   // Life Changing Journey branded gradients
   gradients: {

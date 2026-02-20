@@ -69,6 +69,22 @@ const LoginScreen = ({ navigation }) => {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <StatusBar style="dark" />
+      <TouchableOpacity
+        onPress={() => navigation.goBack()}
+        style={{
+          position: 'absolute',
+          top: 50,
+          left: 16,
+          zIndex: 10,
+          padding: 8,
+          backgroundColor: Colors.surface,
+          borderRadius: 20,
+          borderWidth: 1,
+          borderColor: Colors.lightGray,
+        }}
+      >
+        <Ionicons name="arrow-back" size={22} color={Colors.primary} />
+      </TouchableOpacity>
       <ScrollView 
         contentContainerStyle={GlobalStyles.scrollContainer}
         keyboardShouldPersistTaps="handled"

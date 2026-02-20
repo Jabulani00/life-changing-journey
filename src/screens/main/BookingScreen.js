@@ -1,18 +1,39 @@
 // Premium Booking Screen - Life Changing Journey
-import React, { useState } from 'react'
-import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native'
-import { StatusBar } from 'expo-status-bar'
 import { Ionicons } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
+import { StatusBar } from 'expo-status-bar'
+import React, { useState } from 'react'
+import { Alert, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { useAuth } from '../../context/AuthContext'
+import { createBooking } from '../../services/firebase'
 import { Colors } from '../../styles/colors'
 import { Typography } from '../../styles/typography'
 import { staticData } from '../../utils/staticData'
 
+const isWeb = Platform.OS === 'web'
+
+const inputStyle = {
+  borderWidth: 1,
+  borderColor: Colors.lightGray,
+  borderRadius: 12,
+  paddingHorizontal: 14,
+  paddingVertical: 12,
+  marginBottom: 12,
+  ...Typography.textStyles.body,
+  color: Colors.textPrimary,
+}
+
 const BookingScreen = ({ navigation, route }) => {
+  const { user } = useAuth()
   const [selectedService, setSelectedService] = useState(route?.params?.service || staticData.services[0])
+  const [firstName, setFirstName] = useState('')
+  const [surname, setSurname] = useState('')
+  const [phone, setPhone] = useState('')
+  const [email, setEmail] = useState(user?.email ?? user?.user_metadata?.email ?? '')
   const [selectedDate, setSelectedDate] = useState(null)
   const [selectedTime, setSelectedTime] = useState(null)
-  const [bookingStep, setBookingStep] = useState(1) // 1: Service, 2: Date/Time, 3: Confirmation
+  const [notes, setNotes] = useState('')
+  const [bookingStep, setBookingStep] = useState(1) // 1: Service, 2: Your details, 3: Date/Time
 
   // Generate available dates for the next 30 days
   const generateAvailableDates = () => {
@@ -126,30 +147,126 @@ const BookingScreen = ({ navigation, route }) => {
     </TouchableOpacity>
   )
 
-  const handleBooking = () => {
+  const handleBooking = async () => {
+    const trim = (s) => (s && String(s).trim()) || ''
+    const name = trim(firstName)
+    const sur = trim(surname)
+    const ph = trim(phone)
+    const em = trim(email)
+    if (!name || !sur || !ph || !em) {
+      if (isWeb) window.alert('Please enter your first name, surname, phone number and email.')
+      else Alert.alert('Missing details', 'Please enter your first name, surname, phone number and email.')
+      return
+    }
     if (!selectedDate || !selectedTime) {
-      Alert.alert('Incomplete Booking', 'Please select both date and time for your appointment.')
+      if (isWeb) window.alert('Please select both date and time for your appointment.')
+      else Alert.alert('Incomplete Booking', 'Please select both date and time for your appointment.')
       return
     }
 
-    Alert.alert(
-      'Confirm Booking',
-      `Book ${selectedService.title} on ${selectedDate.dayName}, ${selectedDate.dayNumber} ${selectedDate.monthName} at ${selectedTime}?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Confirm',
-          onPress: () => {
-            Alert.alert(
-              'Booking Confirmed!',
-              'Your appointment has been scheduled. You will receive a confirmation email shortly.',
-              [{ text: 'OK', onPress: () => navigation.navigate('Home') }]
-            )
-          }
-        }
-      ]
-    )
+    const dateStr = selectedDate.dayName + ', ' + selectedDate.dayNumber + ' ' + selectedDate.monthName
+    const userId = user?.id ?? user?.user?.id ?? 'guest'
+
+    try {
+      await createBooking({
+        userId,
+        userEmail: em,
+        name,
+        surname: sur,
+        phone: ph,
+        email: em,
+        serviceId: selectedService.id,
+        serviceTitle: selectedService.title,
+        date: dateStr,
+        time: selectedTime,
+        status: 'pending',
+        notes: notes.trim() || null,
+      })
+      if (isWeb) {
+        window.alert('Booking Confirmed! Your appointment has been saved. You can view it in My Bookings.')
+        navigation.navigate('Home')
+      } else {
+        Alert.alert(
+          'Booking Confirmed!',
+          'Your appointment has been saved. You can view it in My Bookings.',
+          [{ text: 'OK', onPress: () => navigation.navigate('Home') }]
+        )
+      }
+    } catch (e) {
+      const msg = e?.message || 'Could not save booking. Please try again.'
+      if (isWeb) window.alert('Booking failed: ' + msg)
+      else Alert.alert('Booking failed', msg)
+    }
   }
+
+  const ContactDetailsStep = () => (
+    <View>
+      <Text style={{
+        ...Typography.textStyles.h4,
+        color: Colors.textPrimary,
+        marginBottom: 16,
+      }}>
+        Your details
+      </Text>
+      <Text style={{
+        ...Typography.textStyles.bodySmall,
+        color: Colors.textSecondary,
+        marginBottom: 16,
+      }}>
+        We'll use this to confirm your appointment.
+      </Text>
+      <TextInput
+        style={inputStyle}
+        placeholder="First name *"
+        placeholderTextColor={Colors.textMuted}
+        value={firstName}
+        onChangeText={setFirstName}
+        autoCapitalize="words"
+      />
+      <TextInput
+        style={inputStyle}
+        placeholder="Surname *"
+        placeholderTextColor={Colors.textMuted}
+        value={surname}
+        onChangeText={setSurname}
+        autoCapitalize="words"
+      />
+      <TextInput
+        style={inputStyle}
+        placeholder="Phone number *"
+        placeholderTextColor={Colors.textMuted}
+        value={phone}
+        onChangeText={setPhone}
+        keyboardType="phone-pad"
+      />
+      <TextInput
+        style={inputStyle}
+        placeholder="Email *"
+        placeholderTextColor={Colors.textMuted}
+        value={email}
+        onChangeText={setEmail}
+        keyboardType="email-address"
+        autoCapitalize="none"
+      />
+      <Text style={{
+        ...Typography.textStyles.caption,
+        color: Colors.textSecondary,
+        marginTop: 8,
+        marginBottom: 6,
+      }}>
+        Notes (optional) – e.g. what you’d like to focus on
+      </Text>
+      <TextInput
+        style={[inputStyle, { minHeight: 80, textAlignVertical: 'top' }]}
+        placeholder="Add any notes before confirming..."
+        placeholderTextColor={Colors.textMuted}
+        value={notes}
+        onChangeText={setNotes}
+        multiline
+        numberOfLines={3}
+      />
+    </View>
+  )
 
   const ServiceSelectionStep = () => (
     <View>
@@ -180,7 +297,7 @@ const BookingScreen = ({ navigation, route }) => {
               width: 48,
               height: 48,
               borderRadius: 24,
-              backgroundColor: Colors.services[service.category],
+              backgroundColor: Colors.services?.[service.category] ?? Colors.primary,
               justifyContent: 'center',
               alignItems: 'center',
               marginRight: 16,
@@ -239,7 +356,7 @@ const BookingScreen = ({ navigation, route }) => {
             width: 40,
             height: 40,
             borderRadius: 20,
-            backgroundColor: Colors.services[selectedService.category],
+            backgroundColor: Colors.services?.[selectedService.category] ?? Colors.primary,
             justifyContent: 'center',
             alignItems: 'center',
             marginRight: 12,
@@ -366,63 +483,60 @@ const BookingScreen = ({ navigation, route }) => {
         </View>
       </LinearGradient>
 
-      {/* Progress Indicator */}
+      {/* Progress Indicator (3 steps) */}
       <View style={{
         flexDirection: 'row',
         paddingHorizontal: 16,
         paddingVertical: 20,
         alignItems: 'center',
       }}>
-        <View style={{
-          width: 32,
-          height: 32,
-          borderRadius: 16,
-          backgroundColor: bookingStep >= 1 ? Colors.primary : Colors.lightGray,
-          justifyContent: 'center',
-          alignItems: 'center',
-          marginRight: 8,
-        }}>
-          <Text style={{
-            ...Typography.textStyles.captionBold,
-            color: bookingStep >= 1 ? Colors.white : Colors.textSecondary,
-          }}>
-            1
-          </Text>
-        </View>
-        
-        <View style={{
-          flex: 1,
-          height: 2,
-          backgroundColor: bookingStep >= 2 ? Colors.primary : Colors.lightGray,
-          marginHorizontal: 8,
-        }} />
-        
-        <View style={{
-          width: 32,
-          height: 32,
-          borderRadius: 16,
-          backgroundColor: bookingStep >= 2 ? Colors.primary : Colors.lightGray,
-          justifyContent: 'center',
-          alignItems: 'center',
-          marginLeft: 8,
-        }}>
-          <Text style={{
-            ...Typography.textStyles.captionBold,
-            color: bookingStep >= 2 ? Colors.white : Colors.textSecondary,
-          }}>
-            2
-          </Text>
-        </View>
+        {[1, 2, 3].map((step) => (
+          <React.Fragment key={step}>
+            <View style={{
+              width: 28,
+              height: 28,
+              borderRadius: 14,
+              backgroundColor: bookingStep >= step ? Colors.primary : Colors.lightGray,
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
+              <Text style={{
+                ...Typography.textStyles.captionBold,
+                fontSize: 12,
+                color: bookingStep >= step ? Colors.white : Colors.textSecondary,
+              }}>
+                {step}
+              </Text>
+            </View>
+            {step < 3 && (
+              <View style={{
+                flex: 1,
+                height: 2,
+                backgroundColor: bookingStep > step ? Colors.primary : Colors.lightGray,
+                marginHorizontal: 4,
+              }} />
+            )}
+          </React.Fragment>
+        ))}
       </View>
 
       {/* Content */}
-      <ScrollView 
+      <KeyboardAvoidingView
         style={{ flex: 1 }}
-        contentContainerStyle={{ padding: 16, paddingBottom: 120 }}
-        showsVerticalScrollIndicator={false}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={80}
       >
-        {bookingStep === 1 ? <ServiceSelectionStep /> : <DateTimeSelectionStep />}
-      </ScrollView>
+        <ScrollView 
+          style={{ flex: 1 }}
+          contentContainerStyle={{ padding: 16, paddingBottom: 120 }}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          {bookingStep === 1 && <ServiceSelectionStep />}
+          {bookingStep === 2 && <ContactDetailsStep />}
+          {bookingStep === 3 && <DateTimeSelectionStep />}
+        </ScrollView>
+      </KeyboardAvoidingView>
 
       {/* Bottom Actions */}
       <View style={{
@@ -437,7 +551,7 @@ const BookingScreen = ({ navigation, route }) => {
         paddingBottom: 32,
       }}>
         <View style={{ flexDirection: 'row', gap: 12 }}>
-          {bookingStep === 2 && (
+          {bookingStep > 1 && (
             <TouchableOpacity
               style={{
                 flex: 1,
@@ -448,7 +562,7 @@ const BookingScreen = ({ navigation, route }) => {
                 borderWidth: 1,
                 borderColor: Colors.lightGray,
               }}
-              onPress={() => setBookingStep(1)}
+              onPress={() => setBookingStep(bookingStep - 1)}
             >
               <Text style={{
                 ...Typography.textStyles.button,
@@ -465,16 +579,17 @@ const BookingScreen = ({ navigation, route }) => {
               borderRadius: 12,
               paddingVertical: 16,
               alignItems: 'center',
-              opacity: bookingStep === 1 || (selectedDate && selectedTime) ? 1 : 0.6,
+              opacity: (bookingStep === 1) || (bookingStep === 2 && firstName.trim() && surname.trim() && phone.trim() && email.trim()) || (bookingStep === 3 && selectedDate && selectedTime) ? 1 : 0.6,
             }}
             onPress={() => {
-              if (bookingStep === 1) {
-                setBookingStep(2)
-              } else {
-                handleBooking()
-              }
+              if (bookingStep === 1) setBookingStep(2)
+              else if (bookingStep === 2) setBookingStep(3)
+              else handleBooking()
             }}
-            disabled={bookingStep === 2 && (!selectedDate || !selectedTime)}
+            disabled={
+              (bookingStep === 2 && (!firstName.trim() || !surname.trim() || !phone.trim() || !email.trim())) ||
+              (bookingStep === 3 && (!selectedDate || !selectedTime))
+            }
           >
             <LinearGradient
               colors={Colors.gradients.primary}
@@ -491,13 +606,13 @@ const BookingScreen = ({ navigation, route }) => {
                 ...Typography.textStyles.button,
                 color: Colors.white,
               }}>
-                {bookingStep === 1 ? 'Continue' : 'Confirm Booking'}
+                {bookingStep === 1 ? 'Continue' : bookingStep === 2 ? 'Continue' : 'Confirm Booking'}
               </Text>
             </LinearGradient>
           </TouchableOpacity>
         </View>
         
-        {bookingStep === 2 && selectedDate && selectedTime && (
+        {bookingStep === 3 && selectedDate && selectedTime && (
           <View style={{
             backgroundColor: Colors.backgroundSecondary,
             borderRadius: 12,

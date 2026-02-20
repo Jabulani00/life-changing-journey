@@ -16,6 +16,7 @@ import {
 import CustomButton from '../../components/common/CustomButton'
 import CustomInput from '../../components/common/CustomInput'
 import LoadingSpinner from '../../components/common/LoadingSpinner'
+import { submitContactForm } from '../../services/firebase'
 import { Colors } from '../../styles/colors'
 import { Typography } from '../../styles/typography'
 
@@ -70,55 +71,48 @@ const ContactScreen = ({ navigation }) => {
 
   const handleSubmit = async () => {
     if (!validateForm()) return
-    
+
     setLoading(true)
-    
+
     try {
-      const response = await fetch(`${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/send-contact-email`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY}`
-        },
-        body: JSON.stringify(formData)
-      })
-
-      const result = await response.json()
-
-      if (response.ok) {
-        Alert.alert(
-          'Message Sent!',
-          'Thank you for contacting us. We will get back to you within 24 hours.',
-          [
-            {
-              text: 'OK',
-              onPress: () => {
-                // Reset form
-                setFormData({
-                  name: '',
-                  email: '',
-                  phone: '',
-                  subject: '',
-                  message: '',
-                  serviceInterest: ''
-                })
-                setErrors({})
-              }
+      await submitContactForm(formData)
+      Alert.alert(
+        'Message Sent!',
+        'Thank you for contacting us. We will get back to you within 24 hours.',
+        [
+          {
+            text: 'OK',
+            onPress: () => {
+              setFormData({
+                name: '',
+                email: '',
+                phone: '',
+                subject: '',
+                message: '',
+                serviceInterest: ''
+              })
+              setErrors({})
             }
-          ]
-        )
-      } else {
-        throw new Error(result.error || 'Failed to send message')
-      }
+          }
+        ]
+      )
     } catch (error) {
       console.error('Contact form error:', error)
+      const msg = error?.message || 'Failed to save your message.'
+      const needsFirebase = msg.includes('Firebase is not installed')
       Alert.alert(
         'Error',
-        'Failed to send message. Please try again or contact us directly.',
+        needsFirebase
+          ? 'Contact form is not connected yet. Please email us directly.'
+          : 'Failed to send message. Please try again or contact us directly.',
         [
           { text: 'Try Again' },
-          { 
-            text: 'Call Us', 
+          {
+            text: 'Email Us',
+            onPress: () => handleEmail()
+          },
+          {
+            text: 'Call Us',
             onPress: () => Linking.openURL('tel:+27310350208')
           }
         ]

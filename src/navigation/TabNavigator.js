@@ -1,18 +1,18 @@
 // Tab Navigator for main app navigation
-import React from 'react'
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { Ionicons } from '@expo/vector-icons'
-import { Colors } from '../styles/colors'
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
+import React from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import SwipeWrapper from '../components/common/SwipeWrapper'
 import AnimatedScreen from '../components/common/AnimatedScreen'
+import SwipeWrapper from '../components/common/SwipeWrapper'
+import { Colors } from '../styles/colors'
 
 // Import screens
-import HomeScreen from '../screens/main/HomeScreen'
-import ServicesScreen from '../screens/main/ServicesScreen'
 import BookingScreen from '../screens/main/BookingScreen'
-import ResourcesScreen from '../screens/main/ResourcesScreen'
 import DonationScreen from '../screens/main/DonationScreen'
+import HomeScreen from '../screens/main/HomeScreen'
+import ResourcesScreen from '../screens/main/ResourcesScreen'
+import ServicesScreen from '../screens/main/ServicesScreen'
 
 const Tab = createBottomTabNavigator()
 
@@ -84,14 +84,11 @@ const TabNavigator = () => {
         component={withSwipeAndAnim(ServicesScreen, 'Connect', 'Home', 'right')}
         options={{ title: 'Services' }}
       />
-      {/* Booking tab hidden for directory gateway mode */}
-      {false && (
-        <Tab.Screen 
-          name="Booking" 
-          component={BookingScreen}
-          options={{ title: 'Booking' }}
-        />
-      )}
+      <Tab.Screen 
+        name="Booking" 
+        component={withSwipeAndAnim(BookingScreen, null, 'Services', 'left')}
+        options={{ title: 'Booking' }}
+      />
       <Tab.Screen 
         name="Connect" 
         component={withSwipeAndAnim(ResourcesScreen, null, 'Services', 'left')}

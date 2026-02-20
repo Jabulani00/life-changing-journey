@@ -1,19 +1,29 @@
 // Main App Component - Life Changing Journey
+import NetInfo from '@react-native-community/netinfo'
 import React from 'react'
-import { StatusBar, LogBox, Platform } from 'react-native'
-import { AuthProvider } from './src/context/AuthContext'
-import { FontLoader } from './src/providers/FontLoader'
-import { DataProvider } from './src/providers/DataProvider'
-import { NetworkProvider } from './src/utils/networkUtils'
-import ErrorBoundary from './src/components/ErrorBoundary'
-import AppNavigator from './src/navigation/AppNavigator'
-import NetworkStatusBar from './src/components/common/NetworkStatusBar'
+import { LogBox, Platform, StatusBar } from 'react-native'
 import CustomSplashScreen from './src/components/common/CustomSplashScreen'
+import NetworkStatusBar from './src/components/common/NetworkStatusBar'
+import ErrorBoundary from './src/components/ErrorBoundary'
+import { AuthProvider } from './src/context/AuthContext'
+import AppNavigator from './src/navigation/AppNavigator'
+import { DataProvider } from './src/providers/DataProvider'
+import { FontLoader } from './src/providers/FontLoader'
+import { NetworkProvider } from './src/utils/networkUtils'
+
+// On web, NetInfo does HEAD requests to the current origin (localhost:8081). Metro often returns
+// 500 for HEAD, causing ERR_ABORTED 500. Disable the reachability check on web to stop those requests.
+if (Platform.OS === 'web') {
+  NetInfo.configure({
+    reachabilityShouldRun: () => false,
+  })
+}
 
 // Ignore specific warnings in development
 LogBox.ignoreLogs([
   'Non-serializable values were found in the navigation state',
   'Require cycle:',
+  'Blocked aria-hidden',
 ]);
 
 export default function App() {
