@@ -4,6 +4,7 @@ import { NavigationContainer } from '@react-navigation/native'
 import { useAuth } from '../context/AuthContext'
 import AuthNavigator from './AuthNavigator'
 import MainNavigator from './MainNavigator'
+import ChatbotFAB from '../components/common/ChatbotFAB'
 import { View, ActivityIndicator } from 'react-native'
 import { Colors } from '../styles/colors'
 import { GlobalStyles } from '../styles/globalStyles'
@@ -21,7 +22,14 @@ const AppNavigator = () => {
 
   return (
     <NavigationContainer>
-      {user ? <MainNavigator /> : <AuthNavigator />}
+      {user ? (
+        <>
+          <MainNavigator />
+          <ChatbotFAB />
+        </>
+      ) : (
+        <AuthNavigator />
+      )}
     </NavigationContainer>
   )
 }

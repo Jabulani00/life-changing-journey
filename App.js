@@ -2,6 +2,7 @@
 import NetInfo from '@react-native-community/netinfo'
 import React from 'react'
 import { LogBox, Platform, StatusBar } from 'react-native'
+import { SafeAreaProvider } from 'react-native-safe-area-context'
 import CustomSplashScreen from './src/components/common/CustomSplashScreen'
 import NetworkStatusBar from './src/components/common/NetworkStatusBar'
 import ErrorBoundary from './src/components/ErrorBoundary'
@@ -71,25 +72,27 @@ export default function App() {
 
   return (
     <ErrorBoundary>
-      <NetworkProvider>
-        {/* Show Custom Splash Screen outside FontLoader to cover font loading time */}
-        {showSplash && (
-          <CustomSplashScreen
-            onFinish={handleSplashComplete}
-            minimumMs={4000}
-          />
-        )}
-        
-        <FontLoader onReady={() => setFontsReady(true)}>
-          <AuthProvider>
-            <DataProvider>
-              <NetworkStatusBar />
-              <AppNavigator />
-              <StatusBar style="auto" />
-            </DataProvider>
-          </AuthProvider>
-        </FontLoader>
-      </NetworkProvider>
+      <SafeAreaProvider>
+        <NetworkProvider>
+          {/* Show Custom Splash Screen outside FontLoader to cover font loading time */}
+          {showSplash && (
+            <CustomSplashScreen
+              onFinish={handleSplashComplete}
+              minimumMs={4000}
+            />
+          )}
+          
+          <FontLoader onReady={() => setFontsReady(true)}>
+            <AuthProvider>
+              <DataProvider>
+                <NetworkStatusBar />
+                <AppNavigator />
+                <StatusBar style="auto" />
+              </DataProvider>
+            </AuthProvider>
+          </FontLoader>
+        </NetworkProvider>
+      </SafeAreaProvider>
     </ErrorBoundary>
   )
 }

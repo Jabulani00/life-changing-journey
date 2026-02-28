@@ -346,6 +346,22 @@ const HomeScreen = ({ navigation }) => {
               <Ionicons name="videocam" size={24} color={Colors.primary} />
               <Text style={{ ...Typography.textStyles.captionBold, color: Colors.textPrimary, marginTop: 8 }}>Live</Text>
             </TouchableOpacity>
+            <TouchableOpacity
+              style={{
+                backgroundColor: Colors.surface,
+                borderRadius: 16,
+                padding: 16,
+                minWidth: 100,
+                alignItems: 'center',
+                borderWidth: 1,
+                borderColor: Colors.lightGray,
+              }}
+              onPress={() => navigation.navigate('Chatbot')}
+              activeOpacity={0.9}
+            >
+              <Ionicons name="chatbubble-ellipses" size={24} color={Colors.primary} />
+              <Text style={{ ...Typography.textStyles.captionBold, color: Colors.textPrimary, marginTop: 8 }}>Assistant</Text>
+            </TouchableOpacity>
             {admin && (
               <TouchableOpacity
                 style={{

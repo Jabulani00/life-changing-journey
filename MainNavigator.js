@@ -5,9 +5,11 @@ import LoginScreen from '../screens/auth/LoginScreen'
 import ProfileScreen from '../screens/auth/ProfileScreen'
 import RegisterScreen from '../screens/auth/RegisterScreen'
 import AdminScreen from '../screens/main/AdminScreen'
+import ChatbotScreen from '../screens/main/ChatbotScreen'
 import ContactScreen from '../screens/main/ContactScreen'
 import EventsScreen from '../screens/main/EventsScreen'
 import LiveScreen from '../screens/main/LiveScreen'
+import MotivationsScreen from '../screens/main/MotivationsScreen'
 import MyBookingsScreen from '../screens/main/MyBookingsScreen'
 import FinancialGuidanceScreen from '../screens/services/FinancialGuidanceScreen'
 import HypnotherapyScreen from '../screens/services/HypnotherapyScreen'
@@ -15,7 +17,6 @@ import IntegratedServicesScreen from '../screens/services/IntegratedServicesScre
 import MentalWellnessScreen from '../screens/services/MentalWellnessScreen'
 import ServiceDetailScreen from '../screens/services/ServiceDetailScreen'
 import SpiritualGrowthScreen from '../screens/services/SpiritualGrowthScreen'
-import ChatbotScreen from '../screens/main/ChatbotScreen'
 import TabNavigator from './TabNavigator'
 
 const Stack = createStackNavigator()
@@ -123,9 +124,15 @@ const MainNavigator = () => {
         component={MyBookingsScreen}
         options={{ headerShown: false }}
       />
+      {/* ── NEW SCREENS ── */}
       <Stack.Screen 
         name="Chatbot" 
         component={ChatbotScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen 
+        name="Motivations" 
+        component={MotivationsScreen}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>
