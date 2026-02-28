@@ -4,6 +4,18 @@ Admins can post events, manage bookings, set live stream links, and (when implem
 
 ---
 
+## Default admin login
+
+A default admin account is built in so you can sign in without configuring Firestore or env:
+
+| Email | Password |
+|-------|----------|
+| `life.changing@admin.com` | `Password@??` |
+
+**You must create this user in Supabase first:** Supabase → Authentication → Users → Add user (or use Sign Up in the app once with this email and password). After that, signing in with this email will open the **Admin Dashboard** (admin-only navigation). The app always treats `life.changing@admin.com` as admin even if Firestore `config/admins` is not set.
+
+---
+
 ## Option A: Default admin via environment (quick)
 
 Use this for a first-time or single admin without touching Firebase.

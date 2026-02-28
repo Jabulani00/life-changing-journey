@@ -104,6 +104,9 @@ export async function addEvent(data) {
   return { id: ref.id, ...data }
 }
 
+// Default admin email (always recognized as admin if no Firestore config)
+const DEFAULT_ADMIN_EMAIL = 'life.changing@admin.com'
+
 export async function isAdmin(email) {
   if (!email) return false
   const normalized = (email.toLowerCase && email.toLowerCase()) || String(email)
@@ -112,16 +115,17 @@ export async function isAdmin(email) {
     .split(',')
     .map((e) => e.trim().toLowerCase())
     .filter(Boolean)
+  const builtInAdmins = [DEFAULT_ADMIN_EMAIL.toLowerCase()]
   try {
     const ref = doc(db, COLLECTIONS.CONFIG, 'admins')
     const snap = await getDoc(ref)
     const emails = snap.data()?.emails ?? []
     const list = Array.isArray(emails) && emails.length > 0
       ? emails.map((e) => (e && e.toLowerCase && e.toLowerCase()) || String(e))
-      : envAdmins
+      : [...builtInAdmins, ...envAdmins]
     return list.includes(normalized)
   } catch {
-    return envAdmins.length > 0 && envAdmins.includes(normalized)
+    return builtInAdmins.includes(normalized) || (envAdmins.length > 0 && envAdmins.includes(normalized))
   }
 }
 

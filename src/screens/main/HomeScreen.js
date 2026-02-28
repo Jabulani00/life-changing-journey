@@ -25,7 +25,7 @@ import { staticData } from '../../utils/staticData'
 const { width } = Dimensions.get('window')
 
 const HomeScreen = ({ navigation }) => {
-  const { user, getUserProfile, admin } = useAuth()
+  const { user, getUserProfile } = useAuth()
   const insets = useSafeAreaInsets()
   const [userProfile, setUserProfile] = useState(staticData.userProfile)
   const [loading, setLoading] = useState(false)
@@ -346,24 +346,6 @@ const HomeScreen = ({ navigation }) => {
               <Ionicons name="videocam" size={24} color={Colors.primary} />
               <Text style={{ ...Typography.textStyles.captionBold, color: Colors.textPrimary, marginTop: 8 }}>Live</Text>
             </TouchableOpacity>
-            {admin && (
-              <TouchableOpacity
-                style={{
-                  backgroundColor: Colors.surface,
-                  borderRadius: 16,
-                  padding: 16,
-                  minWidth: 100,
-                  alignItems: 'center',
-                  borderWidth: 1,
-                  borderColor: Colors.secondary,
-                }}
-                onPress={() => navigation.navigate('Admin')}
-                activeOpacity={0.9}
-              >
-                <Ionicons name="shield" size={24} color={Colors.secondary} />
-                <Text style={{ ...Typography.textStyles.captionBold, color: Colors.textPrimary, marginTop: 8 }}>Admin</Text>
-              </TouchableOpacity>
-            )}
           </View>
         </View>
 

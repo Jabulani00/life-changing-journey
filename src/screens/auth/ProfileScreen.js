@@ -10,7 +10,7 @@ import { Colors } from '../../styles/colors'
 import { GlobalStyles } from '../../styles/globalStyles'
 
 const ProfileScreen = ({ navigation }) => {
-  const { user, getUserProfile, updateProfile, signOut, admin } = useAuth()
+  const { user, getUserProfile, updateProfile, signOut } = useAuth()
   const [profile, setProfile] = useState({
     full_name: '',
     phone: '',
@@ -137,23 +137,6 @@ const ProfileScreen = ({ navigation }) => {
           <Text style={GlobalStyles.bodyText}>My Bookings</Text>
           <Text style={GlobalStyles.captionText}>View your appointments</Text>
         </TouchableOpacity>
-
-        {admin && (
-          <TouchableOpacity
-            style={{
-              marginTop: 12,
-              padding: 16,
-              backgroundColor: Colors.surface,
-              borderRadius: 12,
-              borderWidth: 1,
-              borderColor: Colors.secondary,
-            }}
-            onPress={() => navigation.navigate('Admin')}
-          >
-            <Text style={[GlobalStyles.bodyText, { color: Colors.secondary }]}>Admin</Text>
-            <Text style={GlobalStyles.captionText}>Post events & view bookings</Text>
-          </TouchableOpacity>
-        )}
 
         <CustomButton
           title="Update Profile"

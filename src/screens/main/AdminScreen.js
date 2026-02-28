@@ -21,9 +21,14 @@ import { addEvent, getBookings, getEvents, getLiveStreamConfig, setLiveStreamCon
 import { Colors } from '../../styles/colors'
 import { Typography } from '../../styles/typography'
 
-const AdminScreen = ({ navigation }) => {
-  const [tab, setTab] = useState('events') // 'events' | 'bookings' | 'live'
+const AdminScreen = ({ navigation, route }) => {
+  const initialTab = route?.params?.initialTab || 'events'
+  const [tab, setTab] = useState(initialTab) // 'events' | 'bookings' | 'live'
   const [events, setEvents] = useState([])
+
+  useEffect(() => {
+    if (route?.params?.initialTab) setTab(route.params.initialTab)
+  }, [route?.params?.initialTab])
   const [bookings, setBookings] = useState([])
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
@@ -117,7 +122,17 @@ const AdminScreen = ({ navigation }) => {
       Alert.alert('Done', 'Event posted.')
       load()
     } catch (e) {
-      Alert.alert('Error', e.message || 'Failed to post event.')
+      const msg = e?.message || 'Failed to post event.'
+      const isPermissionError =
+        msg.includes('permission') ||
+        msg.includes('PERMISSION_DENIED') ||
+        e?.code === 'permission-denied'
+      Alert.alert(
+        'Error',
+        isPermissionError
+          ? `${msg}\n\nFix: In Firebase Console → Firestore → Rules, use test mode or allow write on "events" (see FIREBASE_SETUP.md).`
+          : msg
+      )
     } finally {
       setPosting(false)
     }
@@ -147,6 +162,7 @@ const AdminScreen = ({ navigation }) => {
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           style={styles.backBtn}
+          accessibilityLabel="Back to dashboard"
         >
           <Ionicons name="arrow-back" size={24} color={Colors.white} />
         </TouchableOpacity>

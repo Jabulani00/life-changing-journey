@@ -44,5 +44,5 @@ If you want to **force** users to sign in before they can use the app (login scr
 | Browse without logging in  | **Default** – just open the app. No sign-in required. |
 | Sign in (optional)         | Use **Sign In** from the app (e.g. Profile) with your email and password. |
 | Create an account          | Tap **Sign Up**, fill the form, then sign in. |
-| Admin access               | See **ADMIN_SETUP.md** for default admin logins. |
+| Admin access               | Default admin: **life.changing@admin.com** / **Password@??** (create this user in Supabase first). See **ADMIN_SETUP.md**. |
 | Require login for everyone | Set `EXPO_PUBLIC_ENABLE_AUTH=true` in `.env` and restart. |
