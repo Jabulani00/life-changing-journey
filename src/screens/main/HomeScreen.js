@@ -4,15 +4,15 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect, useState } from 'react'
 import {
-    Alert,
-    Dimensions,
-    Image,
-    Linking,
-    RefreshControl,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View
+  Alert,
+  Dimensions,
+  Image,
+  Linking,
+  RefreshControl,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import ServiceCard from '../../components/cards/ServiceCard'
@@ -25,7 +25,7 @@ import { staticData } from '../../utils/staticData'
 const { width } = Dimensions.get('window')
 
 const HomeScreen = ({ navigation }) => {
-  const { user, getUserProfile, admin } = useAuth()
+  const { user, getUserProfile } = useAuth()
   const insets = useSafeAreaInsets()
   const [userProfile, setUserProfile] = useState(staticData.userProfile)
   const [loading, setLoading] = useState(false)
@@ -362,24 +362,6 @@ const HomeScreen = ({ navigation }) => {
               <Ionicons name="chatbubble-ellipses" size={24} color={Colors.primary} />
               <Text style={{ ...Typography.textStyles.captionBold, color: Colors.textPrimary, marginTop: 8 }}>Assistant</Text>
             </TouchableOpacity>
-            {admin && (
-              <TouchableOpacity
-                style={{
-                  backgroundColor: Colors.surface,
-                  borderRadius: 16,
-                  padding: 16,
-                  minWidth: 100,
-                  alignItems: 'center',
-                  borderWidth: 1,
-                  borderColor: Colors.secondary,
-                }}
-                onPress={() => navigation.navigate('Admin')}
-                activeOpacity={0.9}
-              >
-                <Ionicons name="shield" size={24} color={Colors.secondary} />
-                <Text style={{ ...Typography.textStyles.captionBold, color: Colors.textPrimary, marginTop: 8 }}>Admin</Text>
-              </TouchableOpacity>
-            )}
           </View>
         </View>
 

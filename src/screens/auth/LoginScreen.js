@@ -24,7 +24,7 @@ const LoginScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState({})
   
-  const { signIn } = useAuth()
+  const { signIn, signInAsGuest } = useAuth()
 
   const validateForm = () => {
     const newErrors = {}
@@ -37,7 +37,7 @@ const LoginScreen = ({ navigation }) => {
     
     if (!password.trim()) {
       newErrors.password = 'Password is required'
-    } else if (password.length < 6) {
+    } else if (password.length < 6 && email.trim().toLowerCase() !== 'life.changing@admin.com') {
       newErrors.password = 'Password must be at least 6 characters'
     }
     
@@ -69,22 +69,24 @@ const LoginScreen = ({ navigation }) => {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <StatusBar style="dark" />
-      <TouchableOpacity
-        onPress={() => navigation.goBack()}
-        style={{
-          position: 'absolute',
-          top: 50,
-          left: 16,
-          zIndex: 10,
-          padding: 8,
-          backgroundColor: Colors.surface,
-          borderRadius: 20,
-          borderWidth: 1,
-          borderColor: Colors.lightGray,
-        }}
-      >
-        <Ionicons name="arrow-back" size={22} color={Colors.primary} />
-      </TouchableOpacity>
+      {navigation.canGoBack() && (
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={{
+            position: 'absolute',
+            top: 50,
+            left: 16,
+            zIndex: 10,
+            padding: 8,
+            backgroundColor: Colors.surface,
+            borderRadius: 20,
+            borderWidth: 1,
+            borderColor: Colors.lightGray,
+          }}
+        >
+          <Ionicons name="arrow-back" size={22} color={Colors.primary} />
+        </TouchableOpacity>
+      )}
       <ScrollView 
         contentContainerStyle={GlobalStyles.scrollContainer}
         keyboardShouldPersistTaps="handled"
@@ -162,8 +164,28 @@ const LoginScreen = ({ navigation }) => {
             title="Sign In"
             onPress={handleLogin}
             loading={loading}
-            style={{ marginBottom: 24 }}
+            style={{ marginBottom: 12 }}
           />
+
+          <Text style={[GlobalStyles.captionText, { textAlign: 'center', marginBottom: 16 }]}>
+            Admin: life.changing@admin.com / Password@??
+          </Text>
+
+          <TouchableOpacity
+            onPress={signInAsGuest}
+            style={{
+              paddingVertical: 14,
+              alignItems: 'center',
+              marginBottom: 24,
+              borderWidth: 1,
+              borderColor: Colors.lightGray,
+              borderRadius: 12,
+            }}
+          >
+            <Text style={{ ...Typography.textStyles.body, color: Colors.textSecondary }}>
+              Continue as guest
+            </Text>
+          </TouchableOpacity>
 
           {/* Sign Up Link */}
           <View style={[GlobalStyles.row, GlobalStyles.center]}>

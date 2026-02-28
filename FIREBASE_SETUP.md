@@ -4,10 +4,27 @@ The app uses **Firebase Firestore** for:
 
 - **Bookings** – saved when users confirm on the Booking screen
 - **Contacts** – contact form submissions
-- **Events** – posted by admins
+- **Events** – posted by admins (Admin → Post new event)
 - **Admin role** – document in `config/admins`
 
-**Collections are created automatically** when the first document is added (you do not create them by hand).
+**Collections are created automatically** when the first document is added (you do not create them by hand). The app uses the **life-changing-journey** Firebase project by default.
+
+---
+
+## If events don’t post / “No events yet” / permission errors
+
+**Cause:** Firestore is blocking writes because **security rules** deny unauthenticated or all writes.
+
+**Fix:**
+
+1. Open [Firebase Console](https://console.firebase.google.com/) → select project **life-changing-journey**.
+2. Go to **Build** → **Firestore Database** → **Rules**.
+3. Either:
+   - **Quick (dev only):** choose **Start in test mode** if you just created the database (allows read/write for 30 days), or
+   - **Paste rules:** replace the rules with the contents of the **firestore.rules** file in this project (they allow read/write on `events`, `bookings`, `config`, `contacts` for development).
+4. Click **Publish**. Then in the app, try posting an event again.
+
+After rules allow write, “Post event” will succeed and **Recent events** will list the new event.
 
 ---
 
@@ -26,14 +43,18 @@ If you see **"Unable to resolve module firebase/app"**, the package is missing. 
 ### 2. Enable Firestore in Firebase Console
 
 1. Open [Firebase Console](https://console.firebase.google.com/).
-2. Select the project **chrono-scan** (or the project whose ID matches your app config).
+2. Select the project **life-changing-journey** (or the project whose ID matches your app config in `src/services/firebaseConfig.js`).
 3. In the left menu, click **Build** → **Firestore Database**.
 4. If you see **"Create database"**, click it:
    - Choose **Start in test mode** (allows read/write for 30 days for development).
    - Pick a location (e.g. `europe-west1`) and confirm.
 5. When Firestore is enabled, you’ll see an empty **"Data"** tab. Collections will appear there after the app writes data.
 
-### 3. Restart the app
+### 3. Set Firestore rules so the app can write
+
+If posting events still fails, go to Firestore → **Rules** and use the rules from **firestore.rules** in this repo (or keep test mode), then **Publish**. See the section above.
+
+### 4. Restart the app
 
 Stop the dev server (Ctrl+C) and run again:
 
@@ -41,13 +62,13 @@ Stop the dev server (Ctrl+C) and run again:
 npx expo start
 ```
 
-Then submit a booking or contact form in the app. Check Firestore → **Data**; you should see **bookings** or **contacts** and the new document.
+Then post an event from Admin. Check Firestore → **Data**; you should see the **events** collection and the new document.
 
 ---
 
 ## 1. Firebase Console (detailed)
 
-1. Go to [Firebase Console](https://console.firebase.google.com/) and select the project **chrono-scan** (or the project matching your `projectId`).
+1. Go to [Firebase Console](https://console.firebase.google.com/) and select the project **life-changing-journey** (or the project matching your `projectId` in `src/services/firebaseConfig.js`).
 2. Enable **Firestore Database** (Create database → Start in test mode for development; lock down rules before production).
 
 ## 3. Firestore collections

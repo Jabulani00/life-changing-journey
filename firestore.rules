@@ -1,0 +1,29 @@
+rules_version = '2';
+// Life Changing Journey – Firestore rules
+// Deploy: firebase deploy --only firestore:rules (requires firebase-tools)
+// Or copy these rules into Firebase Console → Firestore Database → Rules
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Events: allow read for all (app Events screen), create/update/delete for admin use.
+    // For development use "allow read, write: if true;" then tighten for production.
+    match /events/{eventId} {
+      allow read: if true;
+      allow create, update, delete: if true;
+    }
+    // Bookings: allow read for owner or admin; create for anyone (booking flow).
+    match /bookings/{bookingId} {
+      allow read, create, update: if true;
+      allow delete: if true;
+    }
+    // Config (e.g. config/admins, config/liveStream): allow read for all, write for admin.
+    match /config/{document=**} {
+      allow read: if true;
+      allow write: if true;
+    }
+    // Contact form submissions
+    match /contacts/{contactId} {
+      allow read, write: if true;
+    }
+  }
+}

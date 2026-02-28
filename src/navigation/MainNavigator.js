@@ -4,7 +4,6 @@ import React from 'react'
 import LoginScreen from '../screens/auth/LoginScreen'
 import ProfileScreen from '../screens/auth/ProfileScreen'
 import RegisterScreen from '../screens/auth/RegisterScreen'
-import AdminScreen from '../screens/main/AdminScreen'
 import ContactScreen from '../screens/main/ContactScreen'
 import EventsScreen from '../screens/main/EventsScreen'
 import LiveScreen from '../screens/main/LiveScreen'
@@ -111,11 +110,6 @@ const MainNavigator = () => {
       <Stack.Screen 
         name="Live" 
         component={LiveScreen}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen 
-        name="Admin" 
-        component={AdminScreen}
         options={{ headerShown: false }}
       />
       <Stack.Screen 

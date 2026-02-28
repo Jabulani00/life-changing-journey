@@ -4,6 +4,24 @@ This document maps the **User Stories & Feature Requirements** to the current co
 
 ---
 
+## 0. Authentication & Role-Based Access (User / Admin Logins)
+
+| User Story | Status | Where in Code |
+|------------|--------|----------------|
+| User: Login and see user app (home, bookings, events, etc.) | ⚠️ **Partial** | App is user-side; auth may exist (e.g. Supabase) but role-based routing unclear |
+| Admin: Login with admin credentials | ❌ **Missing** | No dedicated admin login or role check |
+| Admin: See admin-only navigation (separate from user app) | ❌ **Missing** | AdminScreen may exist but no dedicated admin shell/navigation |
+| Admin: Access admin dashboard after login | ❌ **Missing** | No admin dashboard as entry point; admin needs own layout |
+| User: Cannot access admin routes | ❌ **Missing** | No role guard; admin routes must be protected |
+
+**Gaps to implement**
+- **Auth**: Ensure login screen supports both **user** and **admin** (e.g. same form with role from backend, or separate admin login URL/flow). Store role in session/token (e.g. `user.role === 'admin'`).
+- **Routing**: After login, **user** → existing user app (tabs: Home, Bookings, Events, etc.). **Admin** → separate admin flow: Admin Dashboard (own navigation) with links to Events, Bookings, Motivations, Chatbot config, etc. No mixing of user tabs and admin screens in one nav.
+- **Admin shell**: Implement **admin-only** navigation and dashboard (e.g. `AdminDashboard`, `AdminNav` or drawer/tabs for: Dashboard, Events, Bookings, Motivations, Live Stream, FAQs). App is already the user side; admin gets a distinct entry and layout.
+- **Guards**: Protect admin routes so only users with `role === 'admin'` can open admin dashboard/navigation; redirect others to user app or 404.
+
+---
+
 ## 1. Feature 1: Book Consultation System
 
 | User Story | Status | Where in Code |
@@ -129,18 +147,21 @@ This document maps the **User Stories & Feature Requirements** to the current co
 
 ## 8. Suggested Implementation Order
 
-1. **Booking notes + Admin booking actions** (Features 1 & 2) – small, high impact.
-2. **Events: edit/delete** (Feature 3) – no new collection; extend existing.
-3. **Daily motivations backend + screen + admin** (Feature 4) – new collection and UI.
-4. **Events: images + notifications** (Feature 3) – optional polish.
-5. **Live streaming** (Feature 5) – new screen + config.
-6. **AI Chatbot** (Feature 6) – FAQs + chat UI.
+1. **Authentication & role-based access** (Section 0) – user and admin logins; admin-only navigation and dashboard so admin has their own entry and layout (app stays user-side for regular users). **Do this first** so admin and user see correct pages after login.
+2. **Booking notes + Admin booking actions** (Features 1 & 2) – small, high impact.
+3. **Events: edit/delete** (Feature 3) – no new collection; extend existing.
+4. **Daily motivations backend + screen + admin** (Feature 4) – new collection and UI.
+5. **Events: images + notifications** (Feature 3) – optional polish.
+6. **Live streaming** (Feature 5) – new screen + config.
+7. **AI Chatbot** (Feature 6) – FAQs + chat UI.
 
 ---
 
 ## 9. Success Criteria Checklist
 
 - [ ] All features from user stories document are implemented or explicitly deferred.
+- [ ] **Auth**: User and admin can log in; each sees the correct experience (user → user app, admin → admin dashboard and admin-only navigation).
+- [ ] **Admin**: Admin has their own navigation and dashboard (separate from user app); admin routes are protected by role.
 - [ ] Booking supports notes; admin can approve/reschedule/cancel.
 - [ ] Events: create, edit, delete; optional images and notifications.
 - [ ] Motivations: daily/browse + favorites; admin CRUD.
