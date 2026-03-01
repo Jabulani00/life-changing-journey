@@ -25,7 +25,7 @@ import { staticData } from '../../utils/staticData'
 const { width } = Dimensions.get('window')
 
 const HomeScreen = ({ navigation }) => {
-  const { user, getUserProfile } = useAuth()
+  const { user, getUserProfile, admin } = useAuth()
   const insets = useSafeAreaInsets()
   const [userProfile, setUserProfile] = useState(staticData.userProfile)
   const [loading, setLoading] = useState(false)
@@ -356,12 +356,30 @@ const HomeScreen = ({ navigation }) => {
                 borderWidth: 1,
                 borderColor: Colors.lightGray,
               }}
-              onPress={() => navigation.navigate('Chatbot')}
+              onPress={() => navigation.navigate('Motivations')}
               activeOpacity={0.9}
             >
-              <Ionicons name="chatbubble-ellipses" size={24} color={Colors.primary} />
-              <Text style={{ ...Typography.textStyles.captionBold, color: Colors.textPrimary, marginTop: 8 }}>Assistant</Text>
+              <Ionicons name="sparkles-outline" size={24} color={Colors.primary} />
+              <Text style={{ ...Typography.textStyles.captionBold, color: Colors.textPrimary, marginTop: 8 }}>Daily Word</Text>
             </TouchableOpacity>
+            {admin && (
+              <TouchableOpacity
+                style={{
+                  backgroundColor: Colors.surface,
+                  borderRadius: 16,
+                  padding: 16,
+                  minWidth: 100,
+                  alignItems: 'center',
+                  borderWidth: 1,
+                  borderColor: Colors.lightGray,
+                }}
+                onPress={() => navigation.navigate('Admin')}
+                activeOpacity={0.9}
+              >
+                <Ionicons name="construct-outline" size={24} color={Colors.primary} />
+                <Text style={{ ...Typography.textStyles.captionBold, color: Colors.textPrimary, marginTop: 8 }}>Admin</Text>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
 

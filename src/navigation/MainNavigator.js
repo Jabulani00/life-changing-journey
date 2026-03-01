@@ -14,7 +14,9 @@ import IntegratedServicesScreen from '../screens/services/IntegratedServicesScre
 import MentalWellnessScreen from '../screens/services/MentalWellnessScreen'
 import ServiceDetailScreen from '../screens/services/ServiceDetailScreen'
 import SpiritualGrowthScreen from '../screens/services/SpiritualGrowthScreen'
+import AdminScreen from '../screens/main/AdminScreen'
 import ChatbotScreen from '../screens/main/ChatbotScreen'
+import MotivationsScreen from '../screens/main/MotivationsScreen'
 import TabNavigator from './TabNavigator'
 
 const Stack = createStackNavigator()
@@ -120,6 +122,16 @@ const MainNavigator = () => {
       <Stack.Screen 
         name="Chatbot" 
         component={ChatbotScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen 
+        name="Admin" 
+        component={AdminScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen 
+        name="Motivations" 
+        component={MotivationsScreen}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>

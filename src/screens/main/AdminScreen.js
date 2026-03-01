@@ -17,14 +17,15 @@ import {
     View,
 } from 'react-native'
 import LoadingSpinner from '../../components/common/LoadingSpinner'
-import { addEvent, getBookings, getEvents, getLiveStreamConfig, setLiveStreamConfig, updateBooking } from '../../services/firebase'
+import { addEvent, addMotivation, getBookings, getEvents, getLiveStreamConfig, getMotivations, setLiveStreamConfig, updateBooking } from '../../services/firebase'
 import { Colors } from '../../styles/colors'
 import { Typography } from '../../styles/typography'
 
 const AdminScreen = ({ navigation, route }) => {
   const initialTab = route?.params?.initialTab || 'events'
-  const [tab, setTab] = useState(initialTab) // 'events' | 'bookings' | 'live'
+  const [tab, setTab] = useState(initialTab) // 'events' | 'bookings' | 'live' | 'motivations'
   const [events, setEvents] = useState([])
+  const [motivations, setMotivations] = useState([])
 
   useEffect(() => {
     if (route?.params?.initialTab) setTab(route.params.initialTab)
@@ -38,6 +39,11 @@ const AdminScreen = ({ navigation, route }) => {
   const [description, setDescription] = useState('')
   const [eventDate, setEventDate] = useState('')
   const [location, setLocation] = useState('')
+  // Post motivation form
+  const [motMessage, setMotMessage] = useState('')
+  const [motCategory, setMotCategory] = useState('general')
+  const [motAuthor, setMotAuthor] = useState('')
+  const [motPosting, setMotPosting] = useState(false)
   // Live stream config
   const [liveYoutubeUrl, setLiveYoutubeUrl] = useState('')
   const [liveFacebookUrl, setLiveFacebookUrl] = useState('')
@@ -45,12 +51,14 @@ const AdminScreen = ({ navigation, route }) => {
 
   const load = async () => {
     try {
-      const [evList, bookList] = await Promise.all([
+      const [evList, bookList, motList] = await Promise.all([
         getEvents(),
         getBookings(null, true),
+        getMotivations(),
       ])
       setEvents(evList)
       setBookings(bookList)
+      setMotivations(motList)
     } catch (e) {
       console.warn('Admin load error:', e)
     } finally {
@@ -98,6 +106,31 @@ const AdminScreen = ({ navigation, route }) => {
       Alert.alert('Error', e?.message || 'Failed to save.')
     } finally {
       setLiveSaving(false)
+    }
+  }
+
+  const handlePostMotivation = async () => {
+    const msg = motMessage.trim()
+    if (!msg) {
+      Alert.alert('Missing message', 'Please enter a motivational message or quote.')
+      return
+    }
+    setMotPosting(true)
+    try {
+      await addMotivation({
+        message: msg,
+        category: motCategory,
+        author: motAuthor.trim() || null,
+      })
+      setMotMessage('')
+      setMotAuthor('')
+      setMotCategory('general')
+      Alert.alert('Done', 'Motivation posted.')
+      load()
+    } catch (e) {
+      Alert.alert('Error', e?.message || 'Failed to post motivation.')
+    } finally {
+      setMotPosting(false)
     }
   }
 
@@ -167,7 +200,7 @@ const AdminScreen = ({ navigation, route }) => {
           <Ionicons name="arrow-back" size={24} color={Colors.white} />
         </TouchableOpacity>
         <Text style={styles.title}>Admin</Text>
-        <Text style={styles.subtitle}>Post events & view bookings</Text>
+        <Text style={styles.subtitle}>Post events, motivations & view bookings</Text>
         <View style={styles.tabs}>
           <TouchableOpacity
             style={[styles.tab, tab === 'events' && styles.tabActive]}
@@ -183,6 +216,14 @@ const AdminScreen = ({ navigation, route }) => {
           >
             <Text style={[styles.tabText, tab === 'bookings' && styles.tabTextActive]}>
               Bookings
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.tab, tab === 'motivations' && styles.tabActive]}
+            onPress={() => setTab('motivations')}
+          >
+            <Text style={[styles.tabText, tab === 'motivations' && styles.tabTextActive]}>
+              Motiv.
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -268,6 +309,69 @@ const AdminScreen = ({ navigation, route }) => {
                       <View key={ev.id} style={styles.listItem}>
                         <Text style={styles.listItemTitle}>{ev.title}</Text>
                         <Text style={styles.listItemMeta}>{formatDate(ev.date)}</Text>
+                      </View>
+                    ))
+                  )}
+                </View>
+              </>
+            )}
+
+            {tab === 'motivations' && (
+              <>
+                <View style={styles.section}>
+                  <Text style={styles.sectionTitle}>Post daily motivation</Text>
+                  <TextInput
+                    style={[styles.input, styles.textArea, styles.inputMulti]}
+                    placeholder="Quote, message or scripture *"
+                    placeholderTextColor={Colors.textMuted}
+                    value={motMessage}
+                    onChangeText={setMotMessage}
+                    multiline
+                    numberOfLines={4}
+                  />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Author / source (optional)"
+                    placeholderTextColor={Colors.textMuted}
+                    value={motAuthor}
+                    onChangeText={setMotAuthor}
+                  />
+                  <Text style={styles.label}>Category</Text>
+                  <View style={styles.categoryRow}>
+                    {['general', 'scripture', 'encouragement', 'mindset'].map((cat) => (
+                      <TouchableOpacity
+                        key={cat}
+                        style={[styles.catChip, motCategory === cat && styles.catChipActive]}
+                        onPress={() => setMotCategory(cat)}
+                        activeOpacity={0.8}
+                      >
+                        <Text style={[styles.catText, motCategory === cat && styles.catTextActive]}>
+                          {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                  <TouchableOpacity
+                    style={[styles.btn, motPosting && styles.btnDisabled]}
+                    onPress={handlePostMotivation}
+                    disabled={motPosting}
+                  >
+                    {motPosting ? (
+                      <ActivityIndicator size="small" color={Colors.white} />
+                    ) : (
+                      <Text style={styles.btnText}>Post motivation</Text>
+                    )}
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.section}>
+                  <Text style={styles.sectionTitle}>Recent motivations ({motivations.length})</Text>
+                  {motivations.length === 0 ? (
+                    <Text style={styles.muted}>No posts yet.</Text>
+                  ) : (
+                    motivations.slice(0, 10).map((m) => (
+                      <View key={m.id} style={styles.listItem}>
+                        <Text style={styles.listItemTitle} numberOfLines={2}>{m.message}</Text>
+                        <Text style={styles.listItemMeta}>{m.category} • {formatDate(m.createdAt)}</Text>
                       </View>
                     ))
                   )}
@@ -421,6 +525,38 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
   },
   textArea: { minHeight: 80, textAlignVertical: 'top' },
+  inputMulti: { minHeight: 100 },
+  label: {
+    ...Typography.textStyles.captionBold,
+    color: Colors.textPrimary,
+    marginBottom: 8,
+  },
+  categoryRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 12,
+  },
+  catChip: {
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 20,
+    backgroundColor: Colors.surface,
+    borderWidth: 1,
+    borderColor: Colors.lightGray,
+  },
+  catChipActive: {
+    backgroundColor: Colors.primary + '20',
+    borderColor: Colors.primary,
+  },
+  catText: {
+    ...Typography.textStyles.caption,
+    color: Colors.textSecondary,
+  },
+  catTextActive: {
+    ...Typography.textStyles.captionBold,
+    color: Colors.primary,
+  },
   btn: {
     backgroundColor: Colors.primary,
     borderRadius: 12,

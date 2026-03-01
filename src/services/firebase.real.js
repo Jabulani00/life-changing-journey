@@ -37,6 +37,7 @@ export const COLLECTIONS = {
   EVENTS: 'events',
   CONFIG: 'config',
   CONTACTS: 'contacts',
+  MOTIVATIONS: 'motivations',
 }
 
 export async function createBooking(data) {
@@ -178,4 +179,36 @@ export async function submitContactForm(data) {
     createdAt: serverTimestamp(),
   })
   return { id: ref.id }
+}
+
+/**
+ * Get all motivations (quotes, scriptures, encouragement) for the Daily Motivations feed.
+ * @returns {Promise<Array<{ id: string, message: string, category?: string, author?: string, createdAt?: string }>>}
+ */
+export async function getMotivations() {
+  const snap = await getDocs(collection(db, COLLECTIONS.MOTIVATIONS))
+  const list = snap.docs.map((d) => {
+    const data = d.data()
+    return {
+      id: d.id,
+      ...data,
+      createdAt: data.createdAt?.toDate?.()?.toISOString?.() ?? data.createdAt,
+    }
+  })
+  list.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''))
+  return list
+}
+
+/**
+ * Add a motivation (admin). Used by AdminScreen Motivations tab.
+ * @param {object} data - { message, category?, author? }
+ */
+export async function addMotivation(data) {
+  const ref = await addDoc(collection(db, COLLECTIONS.MOTIVATIONS), {
+    message: data.message?.trim() ?? '',
+    category: (data.category && String(data.category).trim()) || 'general',
+    author: (data.author && String(data.author).trim()) || null,
+    createdAt: serverTimestamp(),
+  })
+  return { id: ref.id, ...data }
 }

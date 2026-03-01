@@ -10,6 +10,7 @@ export const COLLECTIONS = {
   EVENTS: 'events',
   CONFIG: 'config',
   CONTACTS: 'contacts',
+  MOTIVATIONS: 'motivations',
 };
 
 const notInstalled =
@@ -48,5 +49,13 @@ export async function isAdmin() {
 }
 
 export async function submitContactForm() {
+  throw new Error(notInstalled);
+}
+
+export async function getMotivations() {
+  return [];
+}
+
+export async function addMotivation() {
   throw new Error(notInstalled);
 }
