@@ -11,6 +11,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native'
+import ExpandableText from '../../components/common/ExpandableText'
 import LoadingSpinner from '../../components/common/LoadingSpinner'
 import { getEvents } from '../../services/firebase'
 import { Colors } from '../../styles/colors'
@@ -97,17 +98,21 @@ const EventsScreen = ({ navigation }) => {
             events.map((event) => (
               <View key={event.id} style={styles.card}>
                 <View style={styles.cardHeader}>
-                  <Text style={styles.cardTitle} numberOfLines={2}>
-                    {event.title || 'Event'}
-                  </Text>
+                  <ExpandableText
+                    text={event.title || 'Event'}
+                    truncateLength={60}
+                    style={styles.cardTitle}
+                  />
                   <Text style={styles.cardDate}>
                     {formatDate(event.date)}
                   </Text>
                 </View>
                 {event.description ? (
-                  <Text style={styles.cardDesc} numberOfLines={4}>
-                    {event.description}
-                  </Text>
+                  <ExpandableText
+                    text={event.description}
+                    truncateLength={180}
+                    style={styles.cardDesc}
+                  />
                 ) : null}
                 {event.location ? (
                   <View style={styles.row}>

@@ -4,6 +4,8 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { StatusBar } from 'expo-status-bar'
 import React, { useState } from 'react'
 import { Alert, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import DatePickerField from '../../components/common/DatePickerField'
+import TimePickerField from '../../components/common/TimePickerField'
 import { useAuth } from '../../context/AuthContext'
 import { createBooking } from '../../services/firebase'
 import { Colors } from '../../styles/colors'
@@ -32,6 +34,8 @@ const BookingScreen = ({ navigation, route }) => {
   const [email, setEmail] = useState(user?.email ?? user?.user_metadata?.email ?? '')
   const [selectedDate, setSelectedDate] = useState(null)
   const [selectedTime, setSelectedTime] = useState(null)
+  const [pickerDate, setPickerDate] = useState('') // ISO date from date picker
+  const [pickerTime, setPickerTime] = useState('') // HH:mm from time picker
   const [notes, setNotes] = useState('')
   const [bookingStep, setBookingStep] = useState(1) // 1: Service, 2: Your details, 3: Date/Time
 
@@ -83,7 +87,12 @@ const BookingScreen = ({ navigation, route }) => {
         shadowRadius: 4,
         elevation: 3,
       }}
-      onPress={() => dateItem.isAvailable && setSelectedDate(dateItem)}
+      onPress={() => {
+        if (dateItem.isAvailable) {
+          setSelectedDate(dateItem)
+          setPickerDate('')
+        }
+      }}
       disabled={!dateItem.isAvailable}
       activeOpacity={0.9}
     >
@@ -134,7 +143,10 @@ const BookingScreen = ({ navigation, route }) => {
         borderWidth: 1,
         borderColor: isSelected ? Colors.primary : Colors.lightGray,
       }}
-      onPress={() => setSelectedTime(time)}
+      onPress={() => {
+        setSelectedTime(time)
+        setPickerTime('')
+      }}
       activeOpacity={0.9}
     >
       <Text style={{
@@ -158,13 +170,23 @@ const BookingScreen = ({ navigation, route }) => {
       else Alert.alert('Missing details', 'Please enter your first name, surname, phone number and email.')
       return
     }
-    if (!selectedDate || !selectedTime) {
+    const hasCardSelection = selectedDate && selectedTime
+    const hasPickerSelection = pickerDate && pickerTime
+    if (!hasCardSelection && !hasPickerSelection) {
       if (isWeb) window.alert('Please select both date and time for your appointment.')
       else Alert.alert('Incomplete Booking', 'Please select both date and time for your appointment.')
       return
     }
 
-    const dateStr = selectedDate.dayName + ', ' + selectedDate.dayNumber + ' ' + selectedDate.monthName
+    let dateStr, time
+    if (hasPickerSelection) {
+      const d = new Date(pickerDate)
+      dateStr = d.toLocaleDateString('en-US', { weekday: 'short' }) + ', ' + d.getDate() + ' ' + d.toLocaleDateString('en-US', { month: 'short' })
+      time = pickerTime
+    } else {
+      dateStr = selectedDate.dayName + ', ' + selectedDate.dayNumber + ' ' + selectedDate.monthName
+      time = selectedTime
+    }
     const userId = user?.id ?? user?.user?.id ?? 'guest'
 
     try {
@@ -178,7 +200,7 @@ const BookingScreen = ({ navigation, route }) => {
         serviceId: selectedService.id,
         serviceTitle: selectedService.title,
         date: dateStr,
-        time: selectedTime,
+        time,
         status: 'pending',
         notes: notes.trim() || null,
       })
@@ -430,6 +452,35 @@ const BookingScreen = ({ navigation, route }) => {
           </View>
         </View>
       )}
+
+      {/* Or use date/time pickers */}
+      <Text style={{
+        ...Typography.textStyles.h5,
+        color: Colors.textPrimary,
+        marginTop: 8,
+        marginBottom: 12,
+      }}>
+        Or pick date and time
+      </Text>
+      <DatePickerField
+        label="Date"
+        placeholder="Select date"
+        value={pickerDate}
+        onChange={(v) => {
+          setPickerDate(v)
+          setSelectedDate(null)
+        }}
+        minimumDate={new Date()}
+      />
+      <TimePickerField
+        label="Time"
+        placeholder="Select time"
+        value={pickerTime}
+        onChange={(v) => {
+          setPickerTime(v)
+          setSelectedTime(null)
+        }}
+      />
     </View>
   )
 

@@ -11,6 +11,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native'
+import ExpandableText from '../../components/common/ExpandableText'
 import LoadingSpinner from '../../components/common/LoadingSpinner'
 import { useAuth } from '../../context/AuthContext'
 import { getBookings } from '../../services/firebase'
@@ -107,7 +108,11 @@ const MyBookingsScreen = ({ navigation }) => {
                   {b.date} at {b.time}
                 </Text>
                 {b.notes ? (
-                  <Text style={styles.notes} numberOfLines={3}>{b.notes}</Text>
+                  <ExpandableText
+                    text={b.notes}
+                    truncateLength={100}
+                    style={styles.notes}
+                  />
                 ) : null}
                 <View style={styles.statusRow}>
                   <Text style={styles.status}>Status: {b.status || 'pending'}</Text>

@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native'
+import ExpandableText from '../../components/common/ExpandableText'
 import LoadingSpinner from '../../components/common/LoadingSpinner'
 import { getMotivations } from '../../services/firebase'
 import { Colors } from '../../styles/colors'
@@ -79,7 +80,11 @@ const MotivationCard = ({ item }) => {
         <Text style={styles.dateText}>{formatDate(item.createdAt)}</Text>
       </View>
 
-      <Text style={styles.messageText}>{item.message}</Text>
+      <ExpandableText
+        text={item.message}
+        truncateLength={200}
+        style={styles.messageText}
+      />
 
       {item.author && (
         <Text style={styles.authorText}>— {item.author}</Text>

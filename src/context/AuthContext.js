@@ -1,12 +1,19 @@
-// Authentication context for managing user state
+// Authentication context – Firebase Auth + Firestore (same insert pattern as bookings/events)
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import React, { createContext, useContext, useEffect, useState } from 'react'
-import { isAdmin as checkFirebaseAdmin } from '../services/firebase'
-import { supabase } from '../services/supabaseClient'
+import {
+  getUserProfileFromFirestore,
+  isAdmin as checkFirebaseAdmin,
+  registerWithEmailAndPassword,
+  signInWithEmail,
+  signOutFirebase,
+  subscribeToAuthState,
+  updateUserProfileInFirestore,
+} from '../services/firebase'
+import { isSupabaseConfigured, supabase } from '../services/supabaseClient'
 
 const AuthContext = createContext({})
 
-// Default admin credentials – work without Supabase (demo admin session)
 const DEFAULT_ADMIN_EMAIL = 'life.changing@admin.com'
 const DEFAULT_ADMIN_PASSWORD = 'Password@??'
 const DEMO_ADMIN_STORAGE_KEY = 'life_changing_journey_demo_admin'
@@ -17,10 +24,8 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true)
   const [admin, setAdmin] = useState(false)
   const [adminLoading, setAdminLoading] = useState(false)
-  // Login is optional by default (users can browse without signing in). Set EXPO_PUBLIC_ENABLE_AUTH=true to require login.
   const enableAuth = process.env.EXPO_PUBLIC_ENABLE_AUTH === 'true'
 
-  // Resolve admin role from Firebase config when user changes
   useEffect(() => {
     const email = user?.email ?? user?.user_metadata?.email
     if (!email) {
@@ -35,9 +40,9 @@ export const AuthProvider = ({ children }) => {
       .finally(() => setAdminLoading(false))
   }, [user])
 
+  // Firebase Auth state + restore demo admin from storage
   useEffect(() => {
-    const getInitialSession = async () => {
-      // Restore demo admin session if previously used (works with or without enableAuth)
+    const restoreDemoAdmin = async () => {
       try {
         const stored = await AsyncStorage.getItem(DEMO_ADMIN_STORAGE_KEY)
         if (stored) {
@@ -50,72 +55,66 @@ export const AuthProvider = ({ children }) => {
               user_metadata: { email: DEFAULT_ADMIN_EMAIL },
             })
             setLoading(false)
-            return
+            return true
           }
         }
       } catch (_) {}
-
-      if (!enableAuth) {
-        setSession(null)
-        // Don't set user – show login screen so user can use default admin or continue as guest
-        setUser(null)
-        setLoading(false)
-        return
-      }
-      const { data: { session } } = await supabase.auth.getSession()
-      setSession(session)
-      setUser(session?.user ?? null)
-      setLoading(false)
+      return false
     }
 
-    getInitialSession()
-
-    if (enableAuth) {
-      const { data: { subscription } } = supabase.auth.onAuthStateChange(
-        async (event, session) => {
-          setSession(session)
-          setUser(session?.user ?? null)
-          setLoading(false)
+    const unsub = subscribeToAuthState(async (firebaseUser) => {
+      if (firebaseUser) {
+        const profile = await getUserProfileFromFirestore(firebaseUser.uid)
+        setSession({ user: firebaseUser })
+        setUser({
+          id: firebaseUser.uid,
+          uid: firebaseUser.uid,
+          email: firebaseUser.email,
+          user_metadata: {
+            email: firebaseUser.email,
+            full_name: profile?.full_name ?? '',
+          },
+        })
+      } else {
+        const restored = await restoreDemoAdmin()
+        if (!restored) {
+          if (enableAuth && isSupabaseConfigured) {
+            const { data: { session: sbSession } } = await supabase.auth.getSession()
+            setSession(sbSession)
+            setUser(sbSession?.user ?? null)
+          } else {
+            setSession(null)
+            setUser(null)
+          }
         }
-      )
-      return () => subscription?.unsubscribe()
+      }
+      setLoading(false)
+    })
+
+    if (!enableAuth && !user) {
+      restoreDemoAdmin().then((restored) => {
+        if (!restored) setLoading(false)
+      })
     }
-    return () => {}
+
+    return () => unsub()
   }, [])
 
-  // Sign up function
+  // Sign up – Firebase Auth + Firestore users (same insert pattern as createBooking/addEvent)
   const signUp = async (email, password, fullName) => {
-  if (!enableAuth) return { data: null, error: new Error('Auth disabled') }
-  try {
+    try {
       setLoading(true)
-      
-      const { data, error } = await supabase.auth.signUp({
-        email,
+      const data = await registerWithEmailAndPassword(
+        (email || '').trim().toLowerCase(),
         password,
-      })
-
-      if (error) throw error
-
-      // Create user profile
-      if (data.user) {
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert([
-            {
-              id: data.user.id,
-              full_name: fullName,
-              created_at: new Date().toISOString(),
-            }
-          ])
-
-        if (profileError) {
-          console.warn('Profile creation error:', profileError)
-        }
-      }
-
+        (fullName || '').trim()
+      )
+      setSession(data.session)
+      setUser(data.user)
       return { data, error: null }
     } catch (error) {
-      return { data: null, error }
+      const message = error?.message || 'Could not create account.'
+      return { data: null, error: { ...error, message } }
     } finally {
       setLoading(false)
     }
@@ -136,68 +135,53 @@ export const AuthProvider = ({ children }) => {
     setAdmin(true)
   }
 
-  // Sign in – default admin always works (demo session if Supabase not set up or fails)
+  // Sign in – Firebase Auth; default admin uses demo session
   const signIn = async (email, password) => {
     const trimmedEmail = (email || '').trim().toLowerCase()
     const isDefaultAdmin =
       trimmedEmail === DEFAULT_ADMIN_EMAIL.toLowerCase() && password === DEFAULT_ADMIN_PASSWORD
 
-    if (!enableAuth) {
-      if (isDefaultAdmin) {
-        setLoading(true)
-        try {
-          await setDemoAdminSession()
-          setLoading(false)
-          return { data: { user: { email: DEFAULT_ADMIN_EMAIL } }, error: null }
-        } catch (e) {
-          setLoading(false)
-          return { data: null, error: e }
-        }
-      }
-      return {
-        data: null,
-        error: new Error(
-          'Use default admin (life.changing@admin.com / Password@??) or tap Continue as guest.'
-        ),
-      }
-    }
-
     if (isDefaultAdmin) {
       setLoading(true)
       try {
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email: DEFAULT_ADMIN_EMAIL,
-          password: DEFAULT_ADMIN_PASSWORD,
-        })
-        if (!error && data?.user) {
-          setLoading(false)
-          return { data, error: null }
-        }
-        // Supabase failed (e.g. user not created) – use demo admin so login still works
         await setDemoAdminSession()
         setLoading(false)
         return { data: { user: { email: DEFAULT_ADMIN_EMAIL } }, error: null }
-      } catch (_) {
-        try {
-          await setDemoAdminSession()
-          setLoading(false)
-          return { data: { user: { email: DEFAULT_ADMIN_EMAIL } }, error: null }
-        } catch (e) {
-          setLoading(false)
-          return { data: null, error: e }
-        }
+      } catch (e) {
+        setLoading(false)
+        return { data: null, error: e }
       }
     }
 
     try {
       setLoading(true)
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: trimmedEmail || email,
-        password,
+      const data = await signInWithEmail(trimmedEmail || email, password)
+      const profile = await getUserProfileFromFirestore(data.user.uid)
+      setSession(data.session)
+      setUser({
+        id: data.user.uid,
+        uid: data.user.uid,
+        email: data.user.email,
+        user_metadata: {
+          email: data.user.email,
+          full_name: profile?.full_name ?? '',
+        },
       })
-      if (error) throw error
-      return { data, error: null }
+      return { data: { user: data.user }, error: null }
     } catch (error) {
+      if (isSupabaseConfigured) {
+        try {
+          const { data, error } = await supabase.auth.signInWithPassword({
+            email: trimmedEmail,
+            password,
+          })
+          if (!error && data?.user) {
+            setSession(data.session)
+            setUser(data.user)
+            return { data, error: null }
+          }
+        } catch (_) {}
+      }
       return { data: null, error }
     } finally {
       setLoading(false)
@@ -210,14 +194,15 @@ export const AuthProvider = ({ children }) => {
     setUser({ id: 'anonymous-user', role: 'guest', isAnonymous: true })
   }
 
-  // Sign out function
   const signOut = async () => {
     setLoading(true)
     try {
       await AsyncStorage.removeItem(DEMO_ADMIN_STORAGE_KEY)
-      if (enableAuth) {
-        const { error } = await supabase.auth.signOut()
-        if (error) throw error
+      try {
+        await signOutFirebase()
+      } catch (_) {}
+      if (enableAuth && isSupabaseConfigured) {
+        await supabase.auth.signOut()
       }
       setSession(null)
       setUser(null)
@@ -247,42 +232,35 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
-  // Update user profile
   const updateProfile = async (updates) => {
-  if (!enableAuth) return { data: null, error: new Error('Auth disabled') }
-  try {
+    try {
+      if (!user?.id) return { data: null, error: new Error('No user logged in') }
       setLoading(true)
-      
-      if (!user) throw new Error('No user logged in')
-
-      const { data, error } = await supabase
-        .from('profiles')
-        .update(updates)
-        .eq('id', user.id)
-
-      if (error) throw error
-      
-      return { data, error: null }
+      const uid = user.uid || user.id
+      await updateUserProfileInFirestore(uid, updates)
+      return { data: { ...user.user_metadata, ...updates }, error: null }
     } catch (error) {
+      if (isSupabaseConfigured) {
+        const { data, error } = await supabase.from('profiles').update(updates).eq('id', user.id)
+        if (!error) return { data, error: null }
+      }
       return { data: null, error }
     } finally {
       setLoading(false)
     }
   }
 
-  // Get user profile
   const getUserProfile = async () => {
     try {
-      if (!enableAuth) return { data: null, error: new Error('Auth disabled') }
-      if (!user) return { data: null, error: new Error('No user logged in') }
-
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single()
-
-      return { data, error }
+      if (!user?.id) return { data: null, error: new Error('No user logged in') }
+      const uid = user.uid || user.id
+      const profile = await getUserProfileFromFirestore(uid)
+      if (profile) return { data: profile, error: null }
+      if (isSupabaseConfigured) {
+        const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).single()
+        return { data, error }
+      }
+      return { data: user.user_metadata || {}, error: null }
     } catch (error) {
       return { data: null, error }
     }

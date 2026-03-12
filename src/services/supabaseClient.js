@@ -6,9 +6,12 @@ import { staticData } from '../utils/staticData'
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY
 
-// Avoid crashing Metro if env not yet loaded; warn instead
+/** True when real Supabase credentials are set (sign up / sign in will work). */
+export const isSupabaseConfigured =
+  Boolean(supabaseUrl && supabaseAnonKey && supabaseUrl !== 'https://placeholder.supabase.co')
+
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn('[Supabase] Missing EXPO_PUBLIC_SUPABASE_URL or EXPO_PUBLIC_SUPABASE_ANON_KEY. Auth calls will fail until provided.')
+  console.warn('[Supabase] Missing EXPO_PUBLIC_SUPABASE_URL or EXPO_PUBLIC_SUPABASE_ANON_KEY. Sign up and sign in will fail until provided.')
 }
 
 export const supabase = createClient(supabaseUrl || 'https://placeholder.supabase.co', supabaseAnonKey || 'public-anon-key', {

@@ -1,6 +1,7 @@
 // Main Navigator for authenticated users
 import { createStackNavigator } from '@react-navigation/stack'
 import React from 'react'
+import ForgotPasswordScreen from '../screens/auth/ForgotPasswordScreen'
 import LoginScreen from '../screens/auth/LoginScreen'
 import ProfileScreen from '../screens/auth/ProfileScreen'
 import RegisterScreen from '../screens/auth/RegisterScreen'
@@ -38,6 +39,11 @@ const MainNavigator = () => {
       <Stack.Screen 
         name="Register" 
         component={RegisterScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen 
+        name="ForgotPassword" 
+        component={ForgotPasswordScreen}
         options={{ headerShown: false }}
       />
       <Stack.Screen 

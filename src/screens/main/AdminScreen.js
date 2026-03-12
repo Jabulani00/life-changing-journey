@@ -16,6 +16,8 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native'
+import DatePickerField from '../../components/common/DatePickerField'
+import ExpandableText from '../../components/common/ExpandableText'
 import LoadingSpinner from '../../components/common/LoadingSpinner'
 import {
   adminAddEvent,
@@ -283,12 +285,12 @@ const AdminScreen = ({ navigation, route }) => {
                     multiline
                     numberOfLines={3}
                   />
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Date (e.g. 2025-03-15)"
-                    placeholderTextColor={Colors.textMuted}
+                  <DatePickerField
+                    label="Event date"
+                    placeholder="Select date"
                     value={eventDate}
-                    onChangeText={setEventDate}
+                    onChange={setEventDate}
+                    minimumDate={new Date()}
                   />
                   <TextInput
                     style={styles.input}
@@ -316,7 +318,11 @@ const AdminScreen = ({ navigation, route }) => {
                   ) : (
                     events.slice(0, 10).map((ev) => (
                       <View key={ev.id} style={styles.listItem}>
-                        <Text style={styles.listItemTitle}>{ev.title}</Text>
+                        <ExpandableText
+                          text={ev.title}
+                          truncateLength={80}
+                          style={styles.listItemTitle}
+                        />
                         <Text style={styles.listItemMeta}>{formatDate(ev.date)}</Text>
                       </View>
                     ))
@@ -379,7 +385,11 @@ const AdminScreen = ({ navigation, route }) => {
                   ) : (
                     motivations.slice(0, 10).map((m) => (
                       <View key={m.id} style={styles.listItem}>
-                        <Text style={styles.listItemTitle} numberOfLines={2}>{m.message}</Text>
+                        <ExpandableText
+                          text={m.message}
+                          truncateLength={100}
+                          style={styles.listItemTitle}
+                        />
                         <Text style={styles.listItemMeta}>{m.category} • {formatDate(m.createdAt)}</Text>
                       </View>
                     ))
@@ -437,7 +447,11 @@ const AdminScreen = ({ navigation, route }) => {
                         {b.userEmail || b.userId} • {b.date} at {b.time}
                       </Text>
                       {b.notes ? (
-                        <Text style={styles.bookingNotes} numberOfLines={2}>{b.notes}</Text>
+                        <ExpandableText
+                          text={b.notes}
+                          truncateLength={80}
+                          style={styles.bookingNotes}
+                        />
                       ) : null}
                       <Text style={styles.bookingStatus}>Status: {b.status || 'pending'}</Text>
                       {(b.status === 'pending' || b.status === 'rescheduled') && (

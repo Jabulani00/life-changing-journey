@@ -2,12 +2,14 @@
 import { Ionicons } from '@expo/vector-icons'
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect, useState } from 'react'
-import { Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native'
+import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import CustomButton from '../../components/common/CustomButton'
 import CustomInput from '../../components/common/CustomInput'
+import DatePickerField from '../../components/common/DatePickerField'
 import { useAuth } from '../../context/AuthContext'
 import { Colors } from '../../styles/colors'
 import { GlobalStyles } from '../../styles/globalStyles'
+import { Typography } from '../../styles/typography'
 
 const ProfileScreen = ({ navigation }) => {
   const { user, getUserProfile, updateProfile, signOut } = useAuth()
@@ -116,11 +118,12 @@ const ProfileScreen = ({ navigation }) => {
           keyboardType="phone-pad"
         />
 
-        <CustomInput
+        <DatePickerField
           label="Date of Birth"
-          placeholder="YYYY-MM-DD"
+          placeholder="Select date of birth"
           value={profile.date_of_birth}
-          onChangeText={(value) => setProfile({...profile, date_of_birth: value})}
+          onChange={(value) => setProfile({ ...profile, date_of_birth: value })}
+          maximumDate={new Date()}
         />
 
         <TouchableOpacity
@@ -145,15 +148,35 @@ const ProfileScreen = ({ navigation }) => {
           style={{ marginTop: 24 }}
         />
 
-        <CustomButton
-          title="Sign Out"
+        <TouchableOpacity
           onPress={handleSignOut}
-          variant="danger"
-          style={{ marginTop: 16 }}
-        />
+          style={styles.logoutBtn}
+          activeOpacity={0.8}
+        >
+          <Ionicons name="log-out-outline" size={22} color={Colors.white} />
+          <Text style={styles.logoutBtnText}>Log out</Text>
+        </TouchableOpacity>
       </View>
     </ScrollView>
   )
 }
+
+const styles = StyleSheet.create({
+  logoutBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    marginTop: 24,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    backgroundColor: Colors.error,
+    borderRadius: 12,
+  },
+  logoutBtnText: {
+    ...Typography.textStyles.bodyBold,
+    color: Colors.white,
+  },
+})
 
 export default ProfileScreen

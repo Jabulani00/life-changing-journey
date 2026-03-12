@@ -1,42 +1,60 @@
 /**
- * Firebase (Firestore) - real implementation.
- * Used when "firebase" is installed. See firebase.js (stub) when it is not.
- * Lazy init so Metro/bundler doesn't run Firebase at load time (avoids 500 on web).
+ * Firebase (Firestore + Auth) - real implementation.
+ * Same insert pattern as createBooking, addEvent: write to Firestore. Auth via Firebase Auth.
  */
 import { getApp, initializeApp } from 'firebase/app'
 import {
-    addDoc,
-    collection,
-    doc,
-    getDoc,
-    getDocs,
-    getFirestore,
-    query,
-    serverTimestamp,
-    setDoc,
-    updateDoc,
-    where,
+  createUserWithEmailAndPassword,
+  getAuth as getFirebaseAuth,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signOut as firebaseSignOut,
+} from 'firebase/auth'
+import {
+  addDoc,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  getFirestore,
+  query,
+  serverTimestamp,
+  setDoc,
+  updateDoc,
+  where,
 } from 'firebase/firestore'
 import { firebaseConfig } from './firebaseConfig'
 
+let _app = null
 let _db = null
+let _auth = null
+
+function getFirebaseApp() {
+  if (_app) return _app
+  try {
+    _app = getApp()
+  } catch {
+    _app = initializeApp(firebaseConfig)
+  }
+  return _app
+}
+
 function getDb() {
   if (_db) return _db
-  let app
-  try {
-    app = getApp()
-  } catch {
-    app = initializeApp(firebaseConfig)
-  }
-  _db = getFirestore(app)
+  _db = getFirestore(getFirebaseApp())
   if (__DEV__) {
     console.log('[Firebase] Firestore connected, project:', firebaseConfig.projectId)
   }
   return _db
 }
 
-/** For code that needs the Firestore instance (e.g. other services). collection()/doc() require the real instance, not a Proxy. */
-export { getDb }
+function getAuth() {
+  if (_auth) return _auth
+  _auth = getFirebaseAuth(getFirebaseApp())
+  return _auth
+}
+
+export { getDb, getAuth }
 
 export const COLLECTIONS = {
   BOOKINGS: 'bookings',
@@ -44,6 +62,7 @@ export const COLLECTIONS = {
   CONFIG: 'config',
   CONTACTS: 'contacts',
   MOTIVATIONS: 'motivations',
+  USERS: 'users',
 }
 
 export async function createBooking(data) {
@@ -217,4 +236,81 @@ export async function addMotivation(data) {
     createdAt: serverTimestamp(),
   })
   return { id: ref.id, ...data }
+}
+
+// —— Firebase Auth + Firestore users (same insert pattern as bookings/events) ——
+
+/**
+ * Register with email/password: creates Firebase Auth user, then saves profile to Firestore users/{uid}.
+ * Same pattern as createBooking: write to Firestore after auth.
+ */
+export async function registerWithEmailAndPassword(email, password, fullName) {
+  const auth = getAuth()
+  const cred = await createUserWithEmailAndPassword(auth, (email || '').trim().toLowerCase(), password)
+  const uid = cred.user.uid
+  const userEmail = cred.user.email || email
+  const ref = doc(getDb(), COLLECTIONS.USERS, uid)
+  await setDoc(ref, {
+    email: userEmail,
+    full_name: (fullName || '').trim() || null,
+    createdAt: serverTimestamp(),
+  })
+  return {
+    user: {
+      id: uid,
+      uid,
+      email: userEmail,
+      user_metadata: { full_name: fullName || '', email: userEmail },
+    },
+    session: { user: cred.user },
+  }
+}
+
+/**
+ * Sign in with email/password (Firebase Auth).
+ */
+export async function signInWithEmail(email, password) {
+  const auth = getAuth()
+  const result = await signInWithEmailAndPassword(auth, (email || '').trim().toLowerCase(), password)
+  return {
+    user: result.user,
+    session: { user: result.user },
+  }
+}
+
+/**
+ * Sign out (Firebase Auth).
+ */
+export async function signOutFirebase() {
+  const auth = getAuth()
+  await firebaseSignOut(auth)
+}
+
+/**
+ * Subscribe to auth state changes (Firebase Auth).
+ */
+export function subscribeToAuthState(callback) {
+  return onAuthStateChanged(getAuth(), callback)
+}
+
+/**
+ * Get user profile from Firestore users/{uid}. Same read pattern as getBookings/getEvents.
+ */
+export async function getUserProfileFromFirestore(uid) {
+  const ref = doc(getDb(), COLLECTIONS.USERS, uid)
+  const snap = await getDoc(ref)
+  const data = snap.data()
+  return data ? { id: uid, ...data, createdAt: data.createdAt?.toDate?.()?.toISOString?.() ?? data.createdAt } : null
+}
+
+/**
+ * Update user profile in Firestore users/{uid}. Same pattern as updateBooking.
+ */
+export async function updateUserProfileInFirestore(uid, updates) {
+  const ref = doc(getDb(), COLLECTIONS.USERS, uid)
+  const allowed = { updatedAt: serverTimestamp() }
+  if (updates.full_name != null) allowed.full_name = updates.full_name
+  if (updates.phone != null) allowed.phone = updates.phone
+  if (updates.date_of_birth != null) allowed.date_of_birth = updates.date_of_birth
+  await updateDoc(ref, allowed)
 }
