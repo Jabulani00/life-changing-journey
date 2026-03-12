@@ -17,7 +17,16 @@ import {
     View,
 } from 'react-native'
 import LoadingSpinner from '../../components/common/LoadingSpinner'
-import { addEvent, addMotivation, getBookings, getEvents, getLiveStreamConfig, getMotivations, setLiveStreamConfig, updateBooking } from '../../services/firebase'
+import {
+  adminAddEvent,
+  adminAddMotivation,
+  adminGetAllBookings,
+  adminGetEvents,
+  adminGetLiveStreamConfig,
+  adminGetMotivations,
+  adminSetLiveStreamConfig,
+  adminUpdateBooking,
+} from '../../services/adminService'
 import { Colors } from '../../styles/colors'
 import { Typography } from '../../styles/typography'
 
@@ -52,9 +61,9 @@ const AdminScreen = ({ navigation, route }) => {
   const load = async () => {
     try {
       const [evList, bookList, motList] = await Promise.all([
-        getEvents(),
-        getBookings(null, true),
-        getMotivations(),
+        adminGetEvents(),
+        adminGetAllBookings(),
+        adminGetMotivations(),
       ])
       setEvents(evList)
       setBookings(bookList)
@@ -73,7 +82,7 @@ const AdminScreen = ({ navigation, route }) => {
 
   useEffect(() => {
     if (tab === 'live') {
-      getLiveStreamConfig().then((c) => {
+      adminGetLiveStreamConfig().then((c) => {
         setLiveYoutubeUrl(c.youtubeUrl || '')
         setLiveFacebookUrl(c.facebookUrl || '')
       }).catch(() => {})
@@ -87,7 +96,7 @@ const AdminScreen = ({ navigation, route }) => {
 
   const handleBookingAction = async (bookingId, status) => {
     try {
-      await updateBooking(bookingId, { status })
+      await adminUpdateBooking(bookingId, { status })
       load()
     } catch (e) {
       Alert.alert('Error', e?.message || 'Failed to update booking.')
@@ -97,7 +106,7 @@ const AdminScreen = ({ navigation, route }) => {
   const handleSaveLiveStream = async () => {
     setLiveSaving(true)
     try {
-      await setLiveStreamConfig({
+      await adminSetLiveStreamConfig({
         youtubeUrl: liveYoutubeUrl.trim() || null,
         facebookUrl: liveFacebookUrl.trim() || null,
       })
@@ -117,7 +126,7 @@ const AdminScreen = ({ navigation, route }) => {
     }
     setMotPosting(true)
     try {
-      await addMotivation({
+      await adminAddMotivation({
         message: msg,
         category: motCategory,
         author: motAuthor.trim() || null,
@@ -142,7 +151,7 @@ const AdminScreen = ({ navigation, route }) => {
     }
     setPosting(true)
     try {
-      await addEvent({
+      await adminAddEvent({
         title: t,
         description: description.trim() || null,
         date: eventDate.trim() || new Date().toISOString(),

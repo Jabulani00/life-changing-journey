@@ -40,6 +40,14 @@ const AdminDashboardScreen = ({ navigation }) => {
       params: { initialTab: 'bookings' },
     },
     {
+      key: 'motivations',
+      title: 'Motivations',
+      subtitle: 'Post daily quotes and scriptures',
+      icon: 'heart',
+      route: 'AdminManage',
+      params: { initialTab: 'motivations' },
+    },
+    {
       key: 'live',
       title: 'Live Stream',
       subtitle: 'Set YouTube and Facebook live links',

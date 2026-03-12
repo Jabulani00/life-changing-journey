@@ -3,7 +3,7 @@
  * Used when "firebase" is installed. See firebase.js (stub) when it is not.
  * Lazy init so Metro/bundler doesn't run Firebase at load time (avoids 500 on web).
  */
-import { initializeApp } from 'firebase/app'
+import { getApp, initializeApp } from 'firebase/app'
 import {
     addDoc,
     collection,
@@ -22,15 +22,21 @@ import { firebaseConfig } from './firebaseConfig'
 let _db = null
 function getDb() {
   if (_db) return _db
-  const app = initializeApp(firebaseConfig)
+  let app
+  try {
+    app = getApp()
+  } catch {
+    app = initializeApp(firebaseConfig)
+  }
   _db = getFirestore(app)
+  if (__DEV__) {
+    console.log('[Firebase] Firestore connected, project:', firebaseConfig.projectId)
+  }
   return _db
 }
-export const db = new Proxy({}, {
-  get(_, prop) {
-    return getDb()[prop]
-  },
-})
+
+/** For code that needs the Firestore instance (e.g. other services). collection()/doc() require the real instance, not a Proxy. */
+export { getDb }
 
 export const COLLECTIONS = {
   BOOKINGS: 'bookings',
@@ -41,7 +47,7 @@ export const COLLECTIONS = {
 }
 
 export async function createBooking(data) {
-  const ref = await addDoc(collection(db, COLLECTIONS.BOOKINGS), {
+  const ref = await addDoc(collection(getDb(), COLLECTIONS.BOOKINGS), {
     ...data,
     status: data.status || 'pending',
     createdAt: serverTimestamp(),
@@ -50,7 +56,7 @@ export async function createBooking(data) {
 }
 
 export async function getBookings(userId, asAdmin = false) {
-  const col = collection(db, COLLECTIONS.BOOKINGS)
+  const col = collection(getDb(), COLLECTIONS.BOOKINGS)
   const q = asAdmin ? col : query(col, where('userId', '==', userId))
   const snap = await getDocs(q)
   const list = snap.docs.map((d) => ({
@@ -68,7 +74,7 @@ export async function getBookings(userId, asAdmin = false) {
  * @param {object} updates - { status?, date?, time?, notes? }
  */
 export async function updateBooking(bookingId, updates) {
-  const ref = doc(db, COLLECTIONS.BOOKINGS, bookingId)
+  const ref = doc(getDb(), COLLECTIONS.BOOKINGS, bookingId)
   const allowed = {}
   if (updates.status != null) allowed.status = updates.status
   if (updates.date != null) allowed.date = updates.date
@@ -79,7 +85,7 @@ export async function updateBooking(bookingId, updates) {
 }
 
 export async function getEvents() {
-  const snap = await getDocs(collection(db, COLLECTIONS.EVENTS))
+  const snap = await getDocs(collection(getDb(), COLLECTIONS.EVENTS))
   const list = snap.docs.map((d) => {
     const data = d.data()
     return {
@@ -95,7 +101,7 @@ export async function getEvents() {
 
 export async function addEvent(data) {
   const eventDate = data.date ? new Date(data.date) : new Date()
-  const ref = await addDoc(collection(db, COLLECTIONS.EVENTS), {
+  const ref = await addDoc(collection(getDb(), COLLECTIONS.EVENTS), {
     title: data.title,
     description: data.description || null,
     location: data.location || null,
@@ -118,7 +124,7 @@ export async function isAdmin(email) {
     .filter(Boolean)
   const builtInAdmins = [DEFAULT_ADMIN_EMAIL.toLowerCase()]
   try {
-    const ref = doc(db, COLLECTIONS.CONFIG, 'admins')
+    const ref = doc(getDb(), COLLECTIONS.CONFIG, 'admins')
     const snap = await getDoc(ref)
     const emails = snap.data()?.emails ?? []
     const list = Array.isArray(emails) && emails.length > 0
@@ -138,7 +144,7 @@ const LIVE_STREAM_CONFIG_ID = 'liveStream'
  */
 export async function getLiveStreamConfig() {
   try {
-    const ref = doc(db, COLLECTIONS.CONFIG, LIVE_STREAM_CONFIG_ID)
+    const ref = doc(getDb(), COLLECTIONS.CONFIG, LIVE_STREAM_CONFIG_ID)
     const snap = await getDoc(ref)
     const data = snap.data() || {}
     return {
@@ -156,7 +162,7 @@ export async function getLiveStreamConfig() {
  * @param {{ youtubeUrl?: string, facebookUrl?: string }} config
  */
 export async function setLiveStreamConfig(config) {
-  const ref = doc(db, COLLECTIONS.CONFIG, LIVE_STREAM_CONFIG_ID)
+  const ref = doc(getDb(), COLLECTIONS.CONFIG, LIVE_STREAM_CONFIG_ID)
   await setDoc(ref, {
     youtubeUrl: (config.youtubeUrl && String(config.youtubeUrl).trim()) || null,
     facebookUrl: (config.facebookUrl && String(config.facebookUrl).trim()) || null,
@@ -169,7 +175,7 @@ export async function setLiveStreamConfig(config) {
  * @param {object} data - { name, email, phone?, subject, message, serviceInterest? }
  */
 export async function submitContactForm(data) {
-  const ref = await addDoc(collection(db, COLLECTIONS.CONTACTS), {
+  const ref = await addDoc(collection(getDb(), COLLECTIONS.CONTACTS), {
     name: data.name?.trim() ?? '',
     email: data.email?.trim() ?? '',
     phone: (data.phone && String(data.phone).trim()) || null,
@@ -186,7 +192,7 @@ export async function submitContactForm(data) {
  * @returns {Promise<Array<{ id: string, message: string, category?: string, author?: string, createdAt?: string }>>}
  */
 export async function getMotivations() {
-  const snap = await getDocs(collection(db, COLLECTIONS.MOTIVATIONS))
+  const snap = await getDocs(collection(getDb(), COLLECTIONS.MOTIVATIONS))
   const list = snap.docs.map((d) => {
     const data = d.data()
     return {
@@ -204,7 +210,7 @@ export async function getMotivations() {
  * @param {object} data - { message, category?, author? }
  */
 export async function addMotivation(data) {
-  const ref = await addDoc(collection(db, COLLECTIONS.MOTIVATIONS), {
+  const ref = await addDoc(collection(getDb(), COLLECTIONS.MOTIVATIONS), {
     message: data.message?.trim() ?? '',
     category: (data.category && String(data.category).trim()) || 'general',
     author: (data.author && String(data.author).trim()) || null,
