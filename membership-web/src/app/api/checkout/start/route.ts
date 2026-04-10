@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth";
+import { getPaymentMode, getPaymentProvider } from "@/lib/payments";
 import { getPlan } from "@/lib/plans";
-import { mockPaymentProvider } from "@/lib/payments/mock-provider";
 import { saveSuccessfulMembership } from "@/lib/store";
 import type { MemberType } from "@/lib/types";
 
@@ -30,13 +30,30 @@ export async function POST(request: Request) {
   }
 
   const amount = plan.prices[memberType];
-  const checkout = await mockPaymentProvider.createCheckoutSession({
+  const provider = getPaymentProvider();
+  const paymentMode = getPaymentMode();
+
+  const checkout = await provider.createCheckoutSession({
     userId: user.id,
+    email: user.email,
     planId: plan.id,
     memberType,
     amount,
     currency: plan.currency,
   });
+
+  if (checkout.checkoutUrl) {
+    return NextResponse.json({
+      paymentMode,
+      checkout: {
+        sessionId: checkout.sessionId,
+        externalRef: checkout.externalRef,
+        status: checkout.status,
+        checkoutUrl: checkout.checkoutUrl,
+      },
+      message: "Complete payment on the secure checkout page. Membership activates after payment is confirmed.",
+    });
+  }
 
   const result = await saveSuccessfulMembership({
     userId: user.id,
@@ -47,9 +64,11 @@ export async function POST(request: Request) {
     currency: plan.currency,
     externalRef: checkout.externalRef,
     status: checkout.status,
+    gateway: "mock",
   });
 
   return NextResponse.json({
+    paymentMode,
     checkout,
     membership: result.membership,
     transaction: result.transaction,

@@ -19,6 +19,12 @@ const tierDescriptions: Record<string, string> = {
 
 type UserResponse = { user: { id: string; email: string } | null };
 type PlansResponse = { plans: Plan[] };
+type CheckoutStartResponse = {
+  paymentMode?: string;
+  checkout?: { checkoutUrl?: string };
+  message?: string;
+  error?: string;
+};
 
 export default function PlansPage() {
   const [plans, setPlans] = useState<Plan[]>([]);
@@ -54,8 +60,13 @@ export default function PlansPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ planId, memberType }),
       });
-      const body = (await response.json().catch(() => null)) as { message?: string; error?: string } | null;
+      const body = (await response.json().catch(() => null)) as CheckoutStartResponse | null;
       if (!response.ok) throw new Error(body?.error ?? "Purchase failed");
+      if (body?.checkout?.checkoutUrl) {
+        setStatusText(body.message ?? "Redirecting to secure checkout…");
+        window.location.href = body.checkout.checkoutUrl;
+        return;
+      }
       setStatusText(body?.message ?? "Membership updated.");
       window.location.href = "/dashboard";
     } catch (err) {
@@ -97,7 +108,8 @@ export default function PlansPage() {
         ))}
       </section>
       <p className="muted" style={{ marginBottom: "1rem", fontSize: "0.85rem" }}>
-        Payment mode: mock placeholder ({process.env.NEXT_PUBLIC_PAYMENT_MODE ?? "mock"}).
+        {process.env.NEXT_PUBLIC_PAYMENT_HINT ??
+          "Checkout uses Stripe when the server has STRIPE_SECRET_KEY; otherwise the mock provider runs."}
       </p>
 
       <section className="plans-grid">

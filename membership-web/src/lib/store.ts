@@ -1,7 +1,8 @@
-import { randomUUID } from "node:crypto";
 import { addDoc, collection, doc, getDoc, getDocs, limit, orderBy, query, serverTimestamp, setDoc, where } from "firebase/firestore";
 import { firestore } from "@/lib/firebase";
+import { buildMembershipRecords } from "@/lib/membership-persistence";
 import type { MemberType, Membership, PlanId, Transaction } from "@/lib/types";
+import type { PaymentGateway } from "@/lib/types";
 
 export async function getMembership(userId: string) {
   const snapshot = await getDoc(doc(firestore, "user_memberships", userId));
@@ -18,37 +19,13 @@ export async function saveSuccessfulMembership(input: {
   currency: string;
   externalRef: string;
   status: "success" | "pending" | "failed";
+  gateway?: PaymentGateway;
 }) {
-  const now = new Date();
-  const endAt = new Date(now);
-  endAt.setMonth(endAt.getMonth() + 1);
-
-  const membershipId = randomUUID();
-  const membership: Membership = {
-    id: membershipId,
-    userId: input.userId,
-    planId: input.planId,
-    memberType: input.memberType,
-    status: input.status === "success" ? "active" : input.status,
-    startAt: now.toISOString(),
-    endAt: endAt.toISOString(),
-    source: "web",
-    createdAt: now.toISOString(),
-  };
-
-  const tx: Transaction = {
-    id: randomUUID(),
-    userId: input.userId,
-    membershipId,
-    planId: input.planId,
-    memberType: input.memberType,
-    amount: input.amount,
-    currency: input.currency,
-    status: input.status,
-    gateway: "mock",
-    externalRef: input.externalRef,
-    createdAt: now.toISOString(),
-  };
+  const gateway: PaymentGateway = input.gateway ?? "mock";
+  const { membership, transaction: tx, now } = buildMembershipRecords({
+    ...input,
+    gateway,
+  });
 
   await setDoc(doc(firestore, "user_memberships", input.userId), membership);
   await setDoc(doc(firestore, "users", input.userId), {

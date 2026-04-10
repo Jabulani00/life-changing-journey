@@ -23,6 +23,8 @@ export type Membership = {
   createdAt: string;
 };
 
+export type PaymentGateway = "mock" | "stripe";
+
 export type Transaction = {
   id: string;
   userId: string;
@@ -32,7 +34,7 @@ export type Transaction = {
   amount: number;
   currency: string;
   status: "success" | "pending" | "failed";
-  gateway: "mock";
+  gateway: PaymentGateway;
   externalRef: string;
   createdAt: string;
 };

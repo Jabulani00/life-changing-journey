@@ -122,4 +122,38 @@
 - **Web app:** Implemented and themed.
 - **Auth:** Firebase Auth wired and verified via server session token flow.
 - **Membership persistence:** Firestore integrated.
-- **Payment gateway:** **Not yet integrated** (currently mock provider).
+- **Payment gateway:** **Stripe path implemented** (mock still used when `STRIPE_SECRET_KEY` is unset).
+
+---
+
+## Continuation: Stripe integration (implemented)
+
+When `STRIPE_SECRET_KEY` is set on the server, checkout uses **Stripe Checkout** (hosted redirect). Amounts and plan metadata are server-derived from `getPlan()`; activation is applied in the **`checkout.session.completed`** webhook (not in the initial POST), using **Firebase Admin** Firestore and an idempotent `processed_stripe_events/{eventId}` document inside a single transaction.
+
+**New / updated pieces**
+
+- `src/lib/payments/stripe-provider.ts` — `createCheckoutSession` / `verifyPayment` for Stripe.
+- `src/lib/payments/index.ts` — `getPaymentProvider()` / `getPaymentMode()` (Stripe if secret present, else mock).
+- `POST /api/checkout/start` — returns `checkout.checkoutUrl` for Stripe; mock path unchanged.
+- `POST /api/webhooks/stripe` — signature verification (`STRIPE_WEBHOOK_SECRET`), amount/plan validation, transactional writes.
+- `src/lib/membership-persistence.ts` — shared `buildMembershipRecords` for client store + webhook.
+- `src/lib/types.ts` — `PaymentGateway` (`mock` | `stripe`).
+
+**Environment variables (server)**
+
+| Variable | Purpose |
+|----------|---------|
+| `STRIPE_SECRET_KEY` | Enables Stripe provider and webhook client. |
+| `STRIPE_WEBHOOK_SECRET` | Verifies webhook signatures. |
+| `NEXT_PUBLIC_APP_URL` | Base URL for Stripe success/cancel redirects (default `http://localhost:3000`). |
+
+**Stripe Dashboard**
+
+- Add webhook endpoint URL: `{NEXT_PUBLIC_APP_URL}/api/webhooks/stripe` (use your production URL in production).
+- Subscribe to `checkout.session.completed`.
+- Enable **ZAR** and relevant payment methods if billing in South Africa.
+
+**Still recommended (from earlier list)**
+
+- Structured logging, reconciliation fields, admin audit UI, and production Firestore rules hardening.
+- Client UX: dedicated success/cancel pages and retry flows beyond redirect + dashboard query params.
