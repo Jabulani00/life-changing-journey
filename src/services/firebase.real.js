@@ -63,6 +63,8 @@ export const COLLECTIONS = {
   CONTACTS: 'contacts',
   MOTIVATIONS: 'motivations',
   USERS: 'users',
+  /** Same collection as membership-web; doc id = Firebase Auth uid */
+  USER_MEMBERSHIPS: 'user_memberships',
 }
 
 export async function createBooking(data) {

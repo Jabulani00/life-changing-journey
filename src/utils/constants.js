@@ -18,6 +18,21 @@ export const Constants = {
     address: 'Durban, KwaZulu-Natal, South Africa',
     website: 'https://lifechangingjourneyapp.com',
   },
+
+  /**
+   * Base URL for the membership web app (opens `/plans` from the app).
+   * - Set EXPO_PUBLIC_LCJ_WEB_URL to override (e.g. production or LAN IP for a device).
+   * - In development, defaults to http://localhost:3000 so local `membership-web` works.
+   */
+  PUBLIC_SITE_URL: (() => {
+    const fromEnv =
+      typeof process.env.EXPO_PUBLIC_LCJ_WEB_URL === 'string' && process.env.EXPO_PUBLIC_LCJ_WEB_URL
+        ? process.env.EXPO_PUBLIC_LCJ_WEB_URL.replace(/\/$/, '')
+        : ''
+    if (fromEnv) return fromEnv
+    if (typeof __DEV__ !== 'undefined' && __DEV__) return 'http://localhost:3000'
+    return 'https://www.lifechangingjourney.co.za'
+  })(),
   
   // Social Media Links
   SOCIAL_MEDIA: {

@@ -18,6 +18,8 @@ import SpiritualGrowthScreen from '../screens/services/SpiritualGrowthScreen'
 import AdminScreen from '../screens/main/AdminScreen'
 import ChatbotScreen from '../screens/main/ChatbotScreen'
 import MotivationsScreen from '../screens/main/MotivationsScreen'
+import MembershipPackagesScreen from '../components/membership/MembershipPackagesScreen'
+import { Colors } from '../styles/colors'
 import TabNavigator from './TabNavigator'
 
 const Stack = createStackNavigator()
@@ -139,6 +141,17 @@ const MainNavigator = () => {
         name="Motivations" 
         component={MotivationsScreen}
         options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="MembershipPackages"
+        component={MembershipPackagesScreen}
+        options={{
+          headerShown: true,
+          title: 'Membership',
+          headerTintColor: Colors.primary,
+          headerStyle: { backgroundColor: Colors.surface },
+          headerTitleStyle: { fontWeight: '600' },
+        }}
       />
     </Stack.Navigator>
   )

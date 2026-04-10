@@ -362,6 +362,22 @@ const HomeScreen = ({ navigation }) => {
               <Ionicons name="sparkles-outline" size={24} color={Colors.primary} />
               <Text style={{ ...Typography.textStyles.captionBold, color: Colors.textPrimary, marginTop: 8 }}>Daily Word</Text>
             </TouchableOpacity>
+            <TouchableOpacity
+              style={{
+                backgroundColor: Colors.surface,
+                borderRadius: 16,
+                padding: 16,
+                minWidth: 100,
+                alignItems: 'center',
+                borderWidth: 1,
+                borderColor: Colors.lightGray,
+              }}
+              onPress={() => navigation.navigate('MembershipPackages')}
+              activeOpacity={0.9}
+            >
+              <Ionicons name="ribbon-outline" size={24} color={Colors.accent} />
+              <Text style={{ ...Typography.textStyles.captionBold, color: Colors.textPrimary, marginTop: 8 }}>Membership</Text>
+            </TouchableOpacity>
             {admin && (
               <TouchableOpacity
                 style={{
