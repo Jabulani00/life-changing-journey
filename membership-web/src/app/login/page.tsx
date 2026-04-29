@@ -53,7 +53,9 @@ export default function LoginPage() {
         <section className="login-card">
           <div className="login-title">{isSignupMode ? "Create your account" : "Welcome back"}</div>
           <div className="login-sub">
-            {isSignupMode ? "Sign up to purchase and manage your membership" : "Sign in to manage your membership"}
+            {isSignupMode
+              ? "Sign up to purchase and manage your membership"
+              : "Sign in to manage your membership"}
           </div>
           <form onSubmit={onSubmit}>
             <div className="field">
@@ -87,12 +89,8 @@ export default function LoginPage() {
                 Minimum 6 characters
               </div>
             </div>
-            {error ? (
-              <p style={{ color: "#b42318", background: "#fef3f2", padding: "0.5rem", borderRadius: "0.5rem", marginBottom: "0.5rem" }}>
-                {error}
-              </p>
-            ) : null}
-            <button className="btn btn-primary login-btn" type="submit" disabled={loading}>
+            {error ? <div className="alert alert-error">{error}</div> : null}
+            <button className="btn btn-brand login-btn" type="submit" disabled={loading}>
               {isSignupMode ? <FiUserPlus /> : <FiLock />}
               {loading ? "Please wait..." : isSignupMode ? "Create account" : "Sign in"}
             </button>

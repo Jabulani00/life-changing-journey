@@ -10,11 +10,17 @@ export async function GET() {
   }
 
   const membership = await getMembership(user.id);
-  const activePlan = membership?.status === "active" ? membership.planId : undefined;
+  const now = new Date();
+  const isExpired =
+    !membership ||
+    membership.status !== "active" ||
+    new Date(membership.endAt) < now;
+
+  const activePlan = !isExpired ? membership!.planId : undefined;
 
   return NextResponse.json({
     userId: user.id,
-    membership,
+    membership: membership ? { ...membership, isExpired } : null,
     entitlements: mapPlanToEntitlements(activePlan),
   });
 }

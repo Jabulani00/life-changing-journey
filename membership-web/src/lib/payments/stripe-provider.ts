@@ -20,8 +20,8 @@ export class StripePaymentProvider implements PaymentProvider {
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
-      success_url: `${base}/dashboard?checkout=success`,
-      cancel_url: `${base}/plans?checkout=cancelled`,
+      success_url: `${base}/checkout/success`,
+      cancel_url: `${base}/checkout/cancelled`,
       client_reference_id: input.userId,
       ...(input.email ? { customer_email: input.email } : {}),
       metadata: {

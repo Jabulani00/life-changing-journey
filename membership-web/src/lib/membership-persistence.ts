@@ -11,12 +11,16 @@ export type MembershipWriteInput = {
   externalRef: string;
   status: "success" | "pending" | "failed";
   gateway: PaymentGateway;
+  durationMonths?: number;
 };
 
 export function buildMembershipRecords(input: MembershipWriteInput) {
+  const months = input.durationMonths ?? 1;
   const now = new Date();
   const endAt = new Date(now);
-  endAt.setMonth(endAt.getMonth() + 1);
+  endAt.setMonth(endAt.getMonth() + months);
+
+  const source: Membership["source"] = input.gateway === "manual" ? "manual" : "web";
 
   const membershipId = randomUUID();
   const membership: Membership = {
@@ -27,7 +31,7 @@ export function buildMembershipRecords(input: MembershipWriteInput) {
     status: input.status === "success" ? "active" : input.status,
     startAt: now.toISOString(),
     endAt: endAt.toISOString(),
-    source: "web",
+    source,
     createdAt: now.toISOString(),
   };
 

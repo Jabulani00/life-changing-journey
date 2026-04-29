@@ -19,11 +19,11 @@ export type Membership = {
   memberType: MemberType;
   startAt: string;
   endAt: string;
-  source: "web";
+  source: "web" | "manual";
   createdAt: string;
 };
 
-export type PaymentGateway = "mock" | "stripe";
+export type PaymentGateway = "mock" | "stripe" | "manual" | "paystack" | "ozow";
 
 export type Transaction = {
   id: string;

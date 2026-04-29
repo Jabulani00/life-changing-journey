@@ -21,7 +21,7 @@ type UserResponse = { user: { id: string; email: string } | null };
 type PlansResponse = { plans: Plan[] };
 type CheckoutStartResponse = {
   paymentMode?: string;
-  checkout?: { checkoutUrl?: string };
+  checkout?: { checkoutUrl?: string; status?: string };
   message?: string;
   error?: string;
 };
@@ -42,7 +42,6 @@ export default function PlansPage() {
         return;
       }
       setUserEmail(meData.user.email);
-
       const plansData = (await plansRes.json()) as PlansResponse;
       setPlans(plansData.plans);
     }
@@ -62,13 +61,19 @@ export default function PlansPage() {
       });
       const body = (await response.json().catch(() => null)) as CheckoutStartResponse | null;
       if (!response.ok) throw new Error(body?.error ?? "Purchase failed");
+
       if (body?.checkout?.checkoutUrl) {
         setStatusText(body.message ?? "Redirecting to secure checkout…");
         window.location.href = body.checkout.checkoutUrl;
         return;
       }
-      setStatusText(body?.message ?? "Membership updated.");
-      window.location.href = "/dashboard";
+
+      const status = body?.checkout?.status;
+      if (status === "success") {
+        window.location.href = "/checkout/success";
+      } else {
+        window.location.href = "/checkout/cancelled";
+      }
     } catch (err) {
       setStatusText(err instanceof Error ? err.message : "Purchase failed");
     } finally {
@@ -82,6 +87,7 @@ export default function PlansPage() {
         <h2>Choose your membership</h2>
         <p>Signed in as {userEmail || "loading..."} · One-time payment packages.</p>
       </header>
+
       <header className="topbar" style={{ marginBottom: "1rem" }}>
         <div />
         <nav>
@@ -96,6 +102,7 @@ export default function PlansPage() {
         </nav>
       </header>
 
+      {/* Member-type pill selector */}
       <section className="member-selector">
         {(["children", "adults", "couples"] as MemberType[]).map((type) => (
           <button
@@ -107,49 +114,52 @@ export default function PlansPage() {
           </button>
         ))}
       </section>
-      <p className="muted" style={{ marginBottom: "1rem", fontSize: "0.85rem" }}>
-        {process.env.NEXT_PUBLIC_PAYMENT_HINT ??
-          "Checkout uses Stripe when the server has STRIPE_SECRET_KEY; otherwise the mock provider runs."}
-      </p>
 
+      {/* Plan cards */}
       <section className="plans-grid">
-        {sortedPlans.map((plan) => (
-          <article className={`card plan-card ${plan.id} ${plan.id === "gold" ? "featured" : ""}`} key={plan.id}>
-            {plan.id === "gold" ? <div className="featured-badge">Most popular</div> : null}
-            <div className="plan-tier">{plan.id}</div>
-            <div className="plan-name">{plan.name}</div>
-            <p className="plan-desc">{tierDescriptions[plan.id] ?? "Membership package"}</p>
-            <div className="plan-price">
-              <span className="price-currency">R</span>
-              <span className="price">{plan.prices[memberType]}</span>
-            </div>
-            <div className="price-note">One-time payment · {memberTypeLabels[memberType]} plan</div>
-            <hr className="plan-divider" />
-            <div className="plan-benefits">
-              {plan.benefits.map((benefit) => (
-                <div className="benefit" key={benefit}>
-                  <span className="benefit-dot" />
-                  <span>{benefit}</span>
-                </div>
-              ))}
-            </div>
-            <button
-              className={`btn ${plan.id === "gold" ? "btn-primary" : "btn-outline"} plan-btn`}
-              onClick={() => buyPlan(plan.id)}
-              disabled={loadingPlanId === plan.id}
-              style={{ width: "100%" }}
+        {sortedPlans.map((plan) => {
+          const isFeatured = plan.id === "gold";
+          return (
+            <article
+              className={`card plan-card ${plan.id}${isFeatured ? " featured" : ""}`}
+              key={plan.id}
             >
-              <FiCreditCard className="icon-inline" />
-              {loadingPlanId === plan.id ? "Processing..." : `Purchase ${plan.name}`}
-            </button>
-          </article>
-        ))}
+              {isFeatured && <div className="featured-badge">Most popular</div>}
+              <div className="plan-tier">{plan.id}</div>
+              <div className="plan-name">{plan.name}</div>
+              <p className="plan-desc">{tierDescriptions[plan.id] ?? "Membership package"}</p>
+              <div className="plan-price">
+                <span className="price-currency">R</span>
+                <span className="price">{plan.prices[memberType]}</span>
+              </div>
+              <div className="price-note">One-time payment · {memberTypeLabels[memberType]} plan</div>
+              <hr className="plan-divider" />
+              <div className="plan-benefits">
+                {plan.benefits.map((benefit) => (
+                  <div className="benefit" key={benefit}>
+                    <span className="benefit-dot" />
+                    <span>{benefit}</span>
+                  </div>
+                ))}
+              </div>
+              <button
+                className={`btn ${isFeatured ? "btn-primary" : "btn-brand"}`}
+                onClick={() => buyPlan(plan.id)}
+                disabled={loadingPlanId === plan.id}
+                style={{ width: "100%" }}
+              >
+                <FiCreditCard className="icon-inline" />
+                {loadingPlanId === plan.id ? "Processing..." : `Purchase ${plan.name}`}
+              </button>
+            </article>
+          );
+        })}
       </section>
 
       {statusText ? (
-        <p style={{ marginTop: "1rem", padding: "0.75rem", borderRadius: "0.65rem", background: "#f2f4f7" }}>
+        <div className="alert alert-info" style={{ marginTop: "1rem" }}>
           {statusText}
-        </p>
+        </div>
       ) : null}
     </main>
   );
