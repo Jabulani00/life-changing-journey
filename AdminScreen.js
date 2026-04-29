@@ -38,6 +38,7 @@ const AdminScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [posting, setPosting] = useState(false)
+  const [bookingFilter, setBookingFilter] = useState('all') // 'all' | 'priority' | 'standard'
 
   // Post event form
   const [title, setTitle] = useState('')
@@ -362,36 +363,84 @@ const AdminScreen = ({ navigation }) => {
             {/* ── BOOKINGS TAB ── */}
             {tab === 'bookings' && (
               <View style={styles.section}>
-                <Text style={styles.sectionTitle}>All bookings ({bookings.length})</Text>
-                {bookings.length === 0 ? (
-                  <Text style={styles.muted}>No bookings yet.</Text>
-                ) : (
-                  bookings.map((b) => (
-                    <View key={b.id} style={styles.bookingCard}>
-                      <Text style={styles.bookingName}>{b.name} {b.surname}</Text>
-                      <Text style={styles.bookingMeta}>{b.serviceTitle} — {b.date} at {b.time}</Text>
-                      <Text style={styles.bookingMeta}>📧 {b.email} | 📞 {b.phone}</Text>
-                      {b.notes ? <Text style={styles.bookingNotes}>Notes: {b.notes}</Text> : null}
-                      <View style={styles.bookingActions}>
-                        <View style={[styles.statusBadge, { backgroundColor: b.status === 'approved' ? '#10B98120' : b.status === 'cancelled' ? '#EF444420' : '#F59E0B20' }]}>
-                          <Text style={{ fontSize: 12, color: b.status === 'approved' ? '#10B981' : b.status === 'cancelled' ? '#EF4444' : '#F59E0B', fontWeight: '600' }}>
-                            {(b.status || 'pending').toUpperCase()}
-                          </Text>
-                        </View>
-                        {b.status !== 'approved' && (
-                          <TouchableOpacity style={[styles.actionBtn, { backgroundColor: '#10B981' }]} onPress={() => handleBookingAction(b.id, 'approved')}>
-                            <Text style={styles.actionBtnText}>Approve</Text>
-                          </TouchableOpacity>
-                        )}
-                        {b.status !== 'cancelled' && (
-                          <TouchableOpacity style={[styles.actionBtn, { backgroundColor: '#EF4444' }]} onPress={() => handleBookingAction(b.id, 'cancelled')}>
-                            <Text style={styles.actionBtnText}>Cancel</Text>
-                          </TouchableOpacity>
-                        )}
-                      </View>
-                    </View>
-                  ))
-                )}
+                {/* Filter tabs */}
+                <View style={styles.filterRow}>
+                  {[
+                    { key: 'all', label: 'All' },
+                    { key: 'priority', label: 'Priority Members' },
+                    { key: 'standard', label: 'Standard' },
+                  ].map((f) => (
+                    <TouchableOpacity
+                      key={f.key}
+                      style={[styles.filterChip, bookingFilter === f.key && styles.filterChipActive]}
+                      onPress={() => setBookingFilter(f.key)}
+                    >
+                      <Text style={[styles.filterChipText, bookingFilter === f.key && styles.filterChipTextActive]}>
+                        {f.label}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+                {(() => {
+                  const filtered = bookings.filter((b) => {
+                    if (bookingFilter === 'priority') return b.isPriority
+                    if (bookingFilter === 'standard') return !b.isPriority
+                    return true
+                  })
+                  const TIER_COLORS = {
+                    platinum: { bg: '#E8E8F0', text: '#4B4B8F' },
+                    gold: { bg: '#FEF3C7', text: '#92400E' },
+                    silver: { bg: '#F3F4F6', text: '#374151' },
+                  }
+                  return (
+                    <>
+                      <Text style={[styles.sectionTitle, { marginTop: 12 }]}>
+                        {bookingFilter === 'all' ? 'All bookings' : bookingFilter === 'priority' ? 'Priority members' : 'Standard bookings'} ({filtered.length})
+                      </Text>
+                      {filtered.length === 0 ? (
+                        <Text style={styles.muted}>No bookings in this category.</Text>
+                      ) : (
+                        filtered.map((b) => {
+                          const tierColor = TIER_COLORS[b.membershipTier] || null
+                          return (
+                            <View key={b.id} style={[styles.bookingCard, b.isPriority && styles.bookingCardPriority]}>
+                              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 2 }}>
+                                <Text style={styles.bookingName}>{b.name} {b.surname}</Text>
+                                {tierColor && (
+                                  <View style={{ backgroundColor: tierColor.bg, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2 }}>
+                                    <Text style={{ fontSize: 11, fontWeight: '700', color: tierColor.text }}>
+                                      {b.membershipTier.toUpperCase()}
+                                    </Text>
+                                  </View>
+                                )}
+                              </View>
+                              <Text style={styles.bookingMeta}>{b.serviceTitle} — {b.date} at {b.time}</Text>
+                              <Text style={styles.bookingMeta}>📧 {b.email} | 📞 {b.phone}</Text>
+                              {b.notes ? <Text style={styles.bookingNotes}>Notes: {b.notes}</Text> : null}
+                              <View style={styles.bookingActions}>
+                                <View style={[styles.statusBadge, { backgroundColor: b.status === 'approved' ? '#10B98120' : b.status === 'cancelled' ? '#EF444420' : '#F59E0B20' }]}>
+                                  <Text style={{ fontSize: 12, color: b.status === 'approved' ? '#10B981' : b.status === 'cancelled' ? '#EF4444' : '#F59E0B', fontWeight: '600' }}>
+                                    {(b.status || 'pending').toUpperCase()}
+                                  </Text>
+                                </View>
+                                {b.status !== 'approved' && (
+                                  <TouchableOpacity style={[styles.actionBtn, { backgroundColor: '#10B981' }]} onPress={() => handleBookingAction(b.id, 'approved')}>
+                                    <Text style={styles.actionBtnText}>Approve</Text>
+                                  </TouchableOpacity>
+                                )}
+                                {b.status !== 'cancelled' && (
+                                  <TouchableOpacity style={[styles.actionBtn, { backgroundColor: '#EF4444' }]} onPress={() => handleBookingAction(b.id, 'cancelled')}>
+                                    <Text style={styles.actionBtnText}>Cancel</Text>
+                                  </TouchableOpacity>
+                                )}
+                              </View>
+                            </View>
+                          )
+                        })
+                      )}
+                    </>
+                  )
+                })()}
               </View>
             )}
           </ScrollView>
@@ -432,7 +481,13 @@ const styles = StyleSheet.create({
   listItem: { paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#F3F4F6' },
   listItemTitle: { fontSize: 14, fontWeight: '600', color: '#111827' },
   listItemMeta: { fontSize: 12, color: '#9CA3AF', marginTop: 2 },
+  filterRow: { flexDirection: 'row', gap: 8, marginBottom: 4, flexWrap: 'wrap' },
+  filterChip: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, backgroundColor: '#F3F4F6', borderWidth: 1, borderColor: '#E5E7EB' },
+  filterChipActive: { backgroundColor: Colors.primary, borderColor: Colors.primary },
+  filterChipText: { fontSize: 12, color: '#6B7280', fontWeight: '600' },
+  filterChipTextActive: { color: '#FFFFFF' },
   bookingCard: { backgroundColor: '#F9FAFB', borderRadius: 12, padding: 12, marginBottom: 10, borderWidth: 1, borderColor: '#E5E7EB' },
+  bookingCardPriority: { borderColor: '#E6A623', borderWidth: 1.5, backgroundColor: '#FFFBF0' },
   bookingName: { fontSize: 15, fontWeight: '700', color: '#111827', marginBottom: 2 },
   bookingMeta: { fontSize: 12, color: '#6B7280', marginBottom: 2 },
   bookingNotes: { fontSize: 12, color: '#9CA3AF', fontStyle: 'italic', marginTop: 2 },

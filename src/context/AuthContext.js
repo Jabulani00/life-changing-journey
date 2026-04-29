@@ -1,6 +1,6 @@
 // Authentication context – Firebase Auth + Firestore (same insert pattern as bookings/events)
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react'
 import {
   getUserProfileFromFirestore,
   isAdmin as checkFirebaseAdmin,
@@ -10,6 +10,11 @@ import {
   subscribeToAuthState,
   updateUserProfileInFirestore,
 } from '../services/firebase'
+import {
+  getEffectivePlanId,
+  mapPlanToEntitlements,
+  subscribeMembership,
+} from '../services/membershipService'
 import { isSupabaseConfigured, supabase } from '../services/supabaseClient'
 
 const AuthContext = createContext({})
@@ -24,6 +29,8 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true)
   const [admin, setAdmin] = useState(false)
   const [adminLoading, setAdminLoading] = useState(false)
+  const [membership, setMembership] = useState(null)
+  const membershipUnsubRef = useRef(null)
   const enableAuth = process.env.EXPO_PUBLIC_ENABLE_AUTH === 'true'
 
   useEffect(() => {
@@ -39,6 +46,30 @@ export const AuthProvider = ({ children }) => {
       .catch(() => setAdmin(false))
       .finally(() => setAdminLoading(false))
   }, [user])
+
+  // Real-time membership subscription
+  useEffect(() => {
+    const uid = user?.uid || (user?.id !== 'demo-admin' ? user?.id : null)
+    if (membershipUnsubRef.current) {
+      membershipUnsubRef.current()
+      membershipUnsubRef.current = null
+    }
+    if (!uid) {
+      setMembership(null)
+      return
+    }
+    membershipUnsubRef.current = subscribeMembership(
+      uid,
+      (data) => setMembership(data),
+      () => setMembership(null)
+    )
+    return () => {
+      if (membershipUnsubRef.current) {
+        membershipUnsubRef.current()
+        membershipUnsubRef.current = null
+      }
+    }
+  }, [user?.uid, user?.id])
 
   // Firebase Auth state + restore demo admin from storage
   useEffect(() => {
@@ -207,11 +238,13 @@ export const AuthProvider = ({ children }) => {
       setSession(null)
       setUser(null)
       setAdmin(false)
+      setMembership(null)
       return { error: null }
     } catch (error) {
       setSession(null)
       setUser(null)
       setAdmin(false)
+      setMembership(null)
       return { error }
     } finally {
       setLoading(false)
@@ -266,12 +299,18 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
+  const effectivePlanId = getEffectivePlanId(membership)
+  const entitlements = mapPlanToEntitlements(effectivePlanId)
+
   const value = {
     user,
     session,
     loading,
     admin,
     adminLoading,
+    membership,
+    effectivePlanId,
+    entitlements,
     signUp,
     signIn,
     signInAsGuest,

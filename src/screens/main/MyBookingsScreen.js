@@ -15,11 +15,13 @@ import ExpandableText from '../../components/common/ExpandableText'
 import LoadingSpinner from '../../components/common/LoadingSpinner'
 import { useAuth } from '../../context/AuthContext'
 import { getBookings } from '../../services/firebase'
+import { getEffectivePlanId } from '../../services/membershipService'
 import { Colors } from '../../styles/colors'
 import { Typography } from '../../styles/typography'
 
 const MyBookingsScreen = ({ navigation }) => {
-  const { user } = useAuth()
+  const { user, membership } = useAuth()
+  const isPriorityMember = !!(getEffectivePlanId(membership) && (membership?.planId === 'gold' || membership?.planId === 'platinum'))
   const [bookings, setBookings] = useState([])
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
@@ -103,7 +105,14 @@ const MyBookingsScreen = ({ navigation }) => {
           ) : (
             bookings.map((b) => (
               <View key={b.id} style={styles.card}>
-                <Text style={styles.service}>{b.serviceTitle || 'Booking'}</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                  <Text style={styles.service}>{b.serviceTitle || 'Booking'}</Text>
+                  {(b.isPriority || isPriorityMember) && (
+                    <View style={styles.priorityBadge}>
+                      <Text style={styles.priorityBadgeText}>⭐ Priority Booking</Text>
+                    </View>
+                  )}
+                </View>
                 <Text style={styles.meta}>
                   {b.date} at {b.time}
                 </Text>
@@ -191,6 +200,8 @@ const styles = StyleSheet.create({
   },
   statusRow: { marginTop: 8 },
   status: { ...Typography.textStyles.caption, color: Colors.primary },
+  priorityBadge: { backgroundColor: '#FEF3C7', borderRadius: 10, paddingHorizontal: 8, paddingVertical: 2 },
+  priorityBadgeText: { fontSize: 11, fontWeight: '700', color: '#92400E' },
 })
 
 export default MyBookingsScreen

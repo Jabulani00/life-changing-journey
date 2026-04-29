@@ -24,8 +24,14 @@ import { staticData } from '../../utils/staticData'
 
 const { width } = Dimensions.get('window')
 
+const TIER_CHIP = {
+  platinum: { label: 'Platinum Member ★', bg: '#E8E8F0', text: '#4B4B8F' },
+  gold: { label: 'Gold Member ★', bg: '#FEF3C7', text: '#92400E' },
+  silver: { label: 'Silver Member', bg: '#F3F4F6', text: '#374151' },
+}
+
 const HomeScreen = ({ navigation }) => {
-  const { user, getUserProfile, admin } = useAuth()
+  const { user, getUserProfile, admin, effectivePlanId } = useAuth()
   const insets = useSafeAreaInsets()
   const [userProfile, setUserProfile] = useState(staticData.userProfile)
   const [loading, setLoading] = useState(false)
@@ -285,6 +291,15 @@ const HomeScreen = ({ navigation }) => {
             }}>
               Welcome to Life Changing Journey
             </Text>
+            {effectivePlanId && TIER_CHIP[effectivePlanId] && (
+              <View style={{ alignItems: 'center', marginBottom: 6 }}>
+                <View style={{ backgroundColor: TIER_CHIP[effectivePlanId].bg, borderRadius: 20, paddingHorizontal: 14, paddingVertical: 4 }}>
+                  <Text style={{ fontSize: 12, fontWeight: '700', color: TIER_CHIP[effectivePlanId].text }}>
+                    {TIER_CHIP[effectivePlanId].label}
+                  </Text>
+                </View>
+              </View>
+            )}
             <Text style={{
               ...Typography.textStyles.bodySmall,
               color: Colors.textSecondary,
