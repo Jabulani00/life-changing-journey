@@ -25,11 +25,7 @@ export const ENTITLEMENT_LABELS = {
 }
 
 /**
-<<<<<<< HEAD
- * Same rules as web GET /api/me/entitlements, plus optional expiry if endAt is in the past.
-=======
  * Same rules as web GET /api/me/entitlements.
->>>>>>> 99b3b1b (feat(mobile): membership entitlements wired into app)
  * @param {string | undefined} planId
  * @returns {typeof EMPTY}
  */
@@ -49,10 +45,7 @@ export function mapPlanToEntitlements(planId) {
     }
   }
 
-<<<<<<< HEAD
-=======
   // platinum
->>>>>>> 99b3b1b (feat(mobile): membership entitlements wired into app)
   return {
     ...EMPTY,
     priorityBooking: true,
@@ -66,11 +59,7 @@ export function mapPlanToEntitlements(planId) {
 
 /**
  * @param {{ status?: string, endAt?: string, planId?: string } | null | undefined} membership
-<<<<<<< HEAD
- * @returns {string | null} plan id if membership unlocks app features
-=======
  * @returns {string | null} planId if membership is currently active
->>>>>>> 99b3b1b (feat(mobile): membership entitlements wired into app)
  */
 export function getEffectivePlanId(membership) {
   if (!membership || membership.status !== 'active') return null
@@ -90,11 +79,7 @@ export async function getMembership(userId) {
 }
 
 /**
-<<<<<<< HEAD
- * Real-time membership doc (same as web dashboard source).
-=======
  * Real-time membership listener (same Firestore doc as web dashboard).
->>>>>>> 99b3b1b (feat(mobile): membership entitlements wired into app)
  * @returns {import('firebase/firestore').Unsubscribe}
  */
 export function subscribeMembership(userId, onData, onError) {
@@ -109,10 +94,6 @@ export function subscribeMembership(userId, onData, onError) {
       if (!snap.exists()) onData(null)
       else onData(snap.data())
     },
-<<<<<<< HEAD
-    onError
-=======
     onError ?? (() => {})
->>>>>>> 99b3b1b (feat(mobile): membership entitlements wired into app)
   )
 }
