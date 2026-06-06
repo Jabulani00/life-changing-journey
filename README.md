@@ -30,6 +30,7 @@ Open on a physical device or emulator. Push notifications require a **physical d
 
 | Document | Description |
 |----------|-------------|
+| [docs/RELEASE_HISTORY.md](docs/RELEASE_HISTORY.md) | **Store builds** — iOS, Play Store, Huawei APKs, submit status, TestFlight copy |
 | [docs/IMPLEMENTATION_SUMMARY.md](docs/IMPLEMENTATION_SUMMARY.md) | **Master reference** — terms gate, URLs, store config, auth, push notifications |
 | [docs/MEMBERSHIP_EXPO_APP.md](docs/MEMBERSHIP_EXPO_APP.md) | Membership tiers, Firestore sync, web checkout |
 | [FIREBASE_SETUP.md](FIREBASE_SETUP.md) | Firebase project and Firestore setup |

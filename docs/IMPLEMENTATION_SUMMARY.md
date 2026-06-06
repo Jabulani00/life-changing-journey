@@ -7,6 +7,7 @@ This document is the authoritative reference for production-readiness work, lega
 **Platforms:** iOS App Store, Google Play, Huawei App Gallery
 
 Related docs:
+- [Release history](RELEASE_HISTORY.md) — iOS / Play / Huawei build IDs, artifacts, submit status
 - [Membership in the Expo app](MEMBERSHIP_EXPO_APP.md)
 - [Firebase setup](../FIREBASE_SETUP.md)
 - [iOS release guide](../IOS_RELEASE_GUIDE.md)
@@ -115,18 +116,18 @@ All public-facing links use **`https://www.lifechangingjourney.co.za`** unless o
 
 | Platform | Configuration |
 |----------|---------------|
-| **iOS** | `bundleIdentifier`: `com.lifechangingjourney.app`, `associatedDomains`: `applinks:www.lifechangingjourney.co.za`, `UIBackgroundModes`: `remote-notification` |
-| **Android** | `package`: `com.lifechangingjourney.app`, `versionCode`: 1, permissions: `INTERNET`, `ACCESS_NETWORK_STATE`, `POST_NOTIFICATIONS`, `VIBRATE`, deep-link intent filters for `www.lifechangingjourney.co.za` |
+| **iOS** | `bundleIdentifier`: `com.lifechangingjourney.app`, `associatedDomains`: `applinks:www.lifechangingjourney.co.za` |
+| **Android** | `package`: `com.lifechangingjourney.app`, permissions: `INTERNET`, `ACCESS_NETWORK_STATE`, `POST_NOTIFICATIONS`, `VIBRATE`, deep-link intent filters for `www.lifechangingjourney.co.za` |
 | **Extra** | `privacyPolicyUrl`, `termsUrl`, `websiteUrl` pointing to `.co.za` legal and home pages |
-| **Plugins** | `expo-splash-screen`, `expo-notifications` (icon, color `#012630`) |
+| **Plugins** | `expo-splash-screen`, `withoutPushEntitlement` (iOS workaround until push provisioning is regenerated). Re-add `expo-notifications` when credentials are updated — see [RELEASE_HISTORY.md](RELEASE_HISTORY.md). |
 
 ### `eas.json`
 
 | Profile | Purpose |
 |---------|---------|
-| `production` | `EXPO_PUBLIC_ENV=production`, `EXPO_PUBLIC_LCJ_WEB_URL=https://www.lifechangingjourney.co.za`, Android `app-bundle` (Play Store) |
-| `production-huawei` | Extends production, Android `apk` for Huawei App Gallery |
-| `submit.production` | iOS (Apple ID / team), Android (requires `google-play-service-account.json`) |
+| `production` | `EXPO_PUBLIC_ENV=production`, `EXPO_PUBLIC_LCJ_WEB_URL`, `EXPO_PUBLIC_ENABLE_AUTH=true`, `autoIncrement`, Android `app-bundle` (Play Store) |
+| `production-huawei` | Extends production, `EXPO_PUBLIC_STORE_CHANNEL=huawei`, Android `apk` for Huawei App Gallery |
+| `submit.production` | iOS (`ascAppId` 6755474250), Android (`google-play-service-account.json`, internal track) |
 
 ### Build commands
 
