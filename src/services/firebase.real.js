@@ -17,6 +17,7 @@ import {
   getDoc,
   getDocs,
   getFirestore,
+  onSnapshot,
   query,
   serverTimestamp,
   setDoc,
@@ -65,6 +66,8 @@ export const COLLECTIONS = {
   USERS: 'users',
   /** Same collection as membership-web; doc id = Firebase Auth uid */
   USER_MEMBERSHIPS: 'user_memberships',
+  /** Staff follow-ups / call reminders keyed by auto id */
+  STAFF_TASKS: 'staff_tasks',
 }
 
 export async function createBooking(data) {
@@ -76,16 +79,115 @@ export async function createBooking(data) {
   return { id: ref.id, ...data }
 }
 
+/**
+ * Subscribe to Firestore users/{uid} for profile fields including `plan`.
+ * @returns {import('firebase/firestore').Unsubscribe}
+ */
+export function subscribeUserProfile(uid, onData, onError) {
+  if (!uid) {
+    onData(null)
+    return () => {}
+  }
+  const ref = doc(getDb(), COLLECTIONS.USERS, uid)
+  return onSnapshot(
+    ref,
+    (snap) => {
+      if (!snap.exists()) onData(null)
+      else {
+        const d = snap.data()
+        onData({
+          id: uid,
+          ...d,
+          createdAt: d.createdAt?.toDate?.()?.toISOString?.() ?? d.createdAt,
+        })
+      }
+    },
+    onError
+  )
+}
+
+/**
+ * Merge subscription plan onto users/{uid} (kept in sync with membership tier).
+ * @param {string} plan - silver | gold | platinum | null
+ */
+export async function mergeUserPlanField(uid, plan) {
+  if (!uid) return
+  const ref = doc(getDb(), COLLECTIONS.USERS, uid)
+  const prevSnap = await getDoc(ref)
+  const prevPlan = prevSnap.data()?.plan
+  const nextPlan = plan ?? null
+  const planChanged = prevPlan !== nextPlan
+  await setDoc(
+    ref,
+    {
+      plan: nextPlan,
+      notificationTier: plan || 'none',
+      planUpdatedAt: serverTimestamp(),
+      ...(planChanged && nextPlan ? { planActivatedAt: serverTimestamp() } : {}),
+    },
+    { merge: true }
+  )
+}
+
+/**
+ * Create a staff task (call reminder, follow-up, etc.).
+ * @param {{ bookingId: string, userId: string, type: string, payload?: object }} data
+ */
+export async function createStaffTask(data) {
+  const completed = data.completed === true
+  const ref = await addDoc(collection(getDb(), COLLECTIONS.STAFF_TASKS), {
+    bookingId: data.bookingId,
+    userId: data.userId,
+    userName: data.userName ?? null,
+    userEmail: data.userEmail ?? null,
+    plan: data.plan ?? null,
+    type: data.type,
+    dueAt: data.dueAt ?? null,
+    completed,
+    payload: data.payload ?? null,
+    status: completed ? 'done' : 'open',
+    createdAt: serverTimestamp(),
+  })
+  return { id: ref.id }
+}
+
+/**
+ * Count user's bookings in a calendar month by `bookingCategory`.
+ * Uses client filter (suitable for moderate list sizes).
+ */
+export async function countUserMonthBookingsByCategory(userId, category, refDate = new Date()) {
+  const list = await getBookings(userId, false)
+  const y = refDate.getFullYear()
+  const m = refDate.getMonth()
+  return list.filter((b) => {
+    if ((b.bookingCategory || 'standard') !== category) return false
+    const created = b.createdAt ? new Date(b.createdAt) : null
+    if (!created || Number.isNaN(created.getTime())) return false
+    return created.getFullYear() === y && created.getMonth() === m
+  }).length
+}
+
 export async function getBookings(userId, asAdmin = false) {
   const col = collection(getDb(), COLLECTIONS.BOOKINGS)
   const q = asAdmin ? col : query(col, where('userId', '==', userId))
   const snap = await getDocs(q)
-  const list = snap.docs.map((d) => ({
-    id: d.id,
-    ...d.data(),
-    createdAt: d.data().createdAt?.toDate?.()?.toISOString?.(),
-  }))
-  list.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''))
+  const list = snap.docs.map((d) => {
+    const row = d.data()
+    return {
+      id: d.id,
+      ...row,
+      createdAt: row.createdAt?.toDate?.()?.toISOString?.(),
+      scheduledAt: row.scheduledAt?.toDate?.()?.toISOString?.() ?? row.scheduledAt,
+    }
+  })
+  list.sort((a, b) => {
+    const pa = typeof a.priority === 'number' ? a.priority : 0
+    const pb = typeof b.priority === 'number' ? b.priority : 0
+    if (pb !== pa) return pb - pa
+    const sa = a.scheduledAt || a.createdAt || ''
+    const sb = b.scheduledAt || b.createdAt || ''
+    return String(sb).localeCompare(String(sa))
+  })
   return list
 }
 
@@ -101,8 +203,36 @@ export async function updateBooking(bookingId, updates) {
   if (updates.date != null) allowed.date = updates.date
   if (updates.time != null) allowed.time = updates.time
   if (updates.notes != null) allowed.notes = updates.notes
+  if (updates.priority != null) allowed.priority = updates.priority
+  if (updates.scheduledAt != null) allowed.scheduledAt = updates.scheduledAt
   if (Object.keys(allowed).length === 0) return
   await updateDoc(ref, allowed)
+}
+
+/**
+ * All staff tasks (admin). Collection name: staff_tasks.
+ */
+export async function getStaffTasks() {
+  const snap = await getDocs(collection(getDb(), COLLECTIONS.STAFF_TASKS))
+  const list = snap.docs.map((d) => {
+    const row = d.data()
+    return {
+      id: d.id,
+      ...row,
+      dueAt: row.dueAt?.toDate?.()?.toISOString?.() ?? row.dueAt,
+      createdAt: row.createdAt?.toDate?.()?.toISOString?.() ?? row.createdAt,
+    }
+  })
+  list.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''))
+  return list
+}
+
+export async function updateStaffTaskCompleted(taskId, completed) {
+  const ref = doc(getDb(), COLLECTIONS.STAFF_TASKS, taskId)
+  await updateDoc(ref, {
+    completed: !!completed,
+    status: completed ? 'done' : 'open',
+  })
 }
 
 export async function getEvents() {
@@ -203,6 +333,7 @@ export async function submitContactForm(data) {
     subject: data.subject?.trim() ?? '',
     message: data.message?.trim() ?? '',
     serviceInterest: (data.serviceInterest && String(data.serviceInterest).trim()) || null,
+    priorityQueue: data.priorityQueue === true,
     createdAt: serverTimestamp(),
   })
   return { id: ref.id }
@@ -255,6 +386,9 @@ export async function registerWithEmailAndPassword(email, password, fullName) {
   await setDoc(ref, {
     email: userEmail,
     full_name: (fullName || '').trim() || null,
+    plan: 'silver',
+    planCategory: 'adults',
+    planActivatedAt: serverTimestamp(),
     createdAt: serverTimestamp(),
   })
   return {
@@ -314,5 +448,9 @@ export async function updateUserProfileInFirestore(uid, updates) {
   if (updates.full_name != null) allowed.full_name = updates.full_name
   if (updates.phone != null) allowed.phone = updates.phone
   if (updates.date_of_birth != null) allowed.date_of_birth = updates.date_of_birth
+  if (updates.plan !== undefined) allowed.plan = updates.plan
+  if (updates.planCategory !== undefined) allowed.planCategory = updates.planCategory
+  if (updates.isAdmin !== undefined) allowed.isAdmin = updates.isAdmin
+  if (updates.notificationTier !== undefined) allowed.notificationTier = updates.notificationTier
   await updateDoc(ref, allowed)
 }

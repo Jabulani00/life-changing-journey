@@ -15,6 +15,9 @@ import IntegratedServicesScreen from '../screens/services/IntegratedServicesScre
 import MentalWellnessScreen from '../screens/services/MentalWellnessScreen'
 import ServiceDetailScreen from '../screens/services/ServiceDetailScreen'
 import SpiritualGrowthScreen from '../screens/services/SpiritualGrowthScreen'
+import AdminBookingsScreen from '../screens/AdminBookingsScreen'
+import SubscriptionScreen from '../screens/SubscriptionScreen'
+import BookingSuccessScreen from '../screens/BookingSuccessScreen'
 import AdminScreen from '../screens/main/AdminScreen'
 import ChatbotScreen from '../screens/main/ChatbotScreen'
 import MotivationsScreen from '../screens/main/MotivationsScreen'
@@ -153,6 +156,9 @@ const MainNavigator = () => {
           headerTitleStyle: { fontWeight: '600' },
         }}
       />
+      <Stack.Screen name="Subscription" component={SubscriptionScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="BookingSuccess" component={BookingSuccessScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="AdminBookings" component={AdminBookingsScreen} options={{ headerShown: false }} />
     </Stack.Navigator>
   )
 }

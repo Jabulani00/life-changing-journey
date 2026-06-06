@@ -1,17 +1,23 @@
 // Connect Screen - Life Changing Journey social links hub (renamed from Resources)
 import React, { useState, useEffect } from 'react'
 import { View, Text, ScrollView, TouchableOpacity, TextInput, Linking, Image } from 'react-native'
+import UpgradePromptModal from '../../components/subscription/UpgradePromptModal'
+import { PLAN_ID } from '../../config/subscriptionConfig'
+import { useSubscription } from '../../hooks/useSubscription'
 import { StatusBar } from 'expo-status-bar'
 import { Ionicons } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Colors } from '../../styles/colors'
 import { Typography } from '../../styles/typography'
+import ResourceCard from '../../components/cards/ResourceCard'
 import { staticData } from '../../utils/staticData'
 import { fetchYouTubeChannelVideos, fetchYouTubeVideosByHandle } from '../../utils/networkUtils'
 
 const ResourcesScreen = ({ navigation }) => {
+  const sub = useSubscription()
   const [searchQuery, setSearchQuery] = useState('')
   const [activeTab, setActiveTab] = useState('social') // 'social' | 'podcasts'
+  const [upgradeModal, setUpgradeModal] = useState({ visible: false, suggestedPlan: PLAN_ID.GOLD, message: '' })
 
   const links = [
     { id: 'facebook', title: 'Facebook', icon: 'logo-facebook', color: '#1877F2', url: 'https://www.facebook.com/share/1B7sqUfweq/' },
@@ -372,6 +378,80 @@ const ResourcesScreen = ({ navigation }) => {
               ))}
             </View>
           )}
+
+          {sub.hasContentLibrary ? (
+            <FeaturedSection />
+          ) : (
+            <TouchableOpacity
+              onPress={() =>
+                setUpgradeModal({
+                  visible: true,
+                  suggestedPlan: PLAN_ID.GOLD,
+                  message: 'The full resource library is available on Gold and Platinum.',
+                })
+              }
+              style={{
+                marginTop: 20,
+                padding: 16,
+                backgroundColor: Colors.surface,
+                borderRadius: 16,
+                borderWidth: 1,
+                borderColor: Colors.lightGray,
+              }}
+            >
+              <Text style={{ ...Typography.textStyles.captionBold, color: Colors.primary, marginBottom: 6 }}>
+                Content library
+              </Text>
+              <Text style={{ ...Typography.textStyles.bodySmall, color: Colors.textSecondary }}>
+                Tap to learn how to unlock articles, media, and featured resources.
+              </Text>
+            </TouchableOpacity>
+          )}
+
+          {sub.hasPrivateCommunity ? (
+            <View
+              style={{
+                marginTop: 16,
+                padding: 16,
+                backgroundColor: Colors.brandTeal + '15',
+                borderRadius: 16,
+                borderWidth: 1,
+                borderColor: Colors.brandTeal + '40',
+              }}
+            >
+              <Text style={{ ...Typography.textStyles.captionBold, color: Colors.infoDark, marginBottom: 6 }}>
+                Private community
+              </Text>
+              <Text style={{ ...Typography.textStyles.bodySmall, color: Colors.textPrimary }}>
+                You have access to the Platinum private support circle. Stay tuned for in-app channels as we roll them out.
+              </Text>
+            </View>
+          ) : (
+            <TouchableOpacity
+              onPress={() =>
+                setUpgradeModal({
+                  visible: true,
+                  suggestedPlan: PLAN_ID.PLATINUM,
+                  message: 'Private community access is included with Platinum.',
+                })
+              }
+              style={{
+                marginTop: 16,
+                padding: 16,
+                backgroundColor: Colors.surface,
+                borderRadius: 16,
+                borderWidth: 1,
+                borderColor: Colors.lightGray,
+              }}
+            >
+              <Text style={{ ...Typography.textStyles.captionBold, color: Colors.textPrimary, marginBottom: 6 }}>
+                Private community (Platinum)
+              </Text>
+              <Text style={{ ...Typography.textStyles.bodySmall, color: Colors.textSecondary }}>
+                Tap to view membership options.
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
         ) : (
           <View style={{ paddingHorizontal: 16 }}>
@@ -670,6 +750,14 @@ const ResourcesScreen = ({ navigation }) => {
           </TouchableOpacity>
         </View>
       </ScrollView>
+
+      <UpgradePromptModal
+        visible={upgradeModal.visible}
+        onClose={() => setUpgradeModal((m) => ({ ...m, visible: false }))}
+        suggestedPlan={upgradeModal.suggestedPlan}
+        message={upgradeModal.message}
+        navigation={navigation}
+      />
     </View>
   )
 }

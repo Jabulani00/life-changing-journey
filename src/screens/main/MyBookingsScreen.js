@@ -103,9 +103,26 @@ const MyBookingsScreen = ({ navigation }) => {
           ) : (
             bookings.map((b) => (
               <View key={b.id} style={styles.card}>
-                <Text style={styles.service}>{b.serviceTitle || 'Booking'}</Text>
+                <Text style={styles.service}>
+                  {b.serviceTitle || (b.source === 'calendly' ? 'Calendly session' : 'Booking')}
+                </Text>
+                {(typeof b.priority === 'number' && b.priority > 0) || b.isPriorityBooking ? (
+                  <Text style={[styles.meta, { color: Colors.success, fontWeight: '600' }]}>
+                    Priority queue
+                  </Text>
+                ) : null}
+                {b.discountedPrice != null ? (
+                  <Text style={styles.meta}>
+                    Price after member savings: R{b.discountedPrice}
+                    {b.originalPrice != null ? ` (was R${b.originalPrice})` : ''}
+                  </Text>
+                ) : typeof b.discountApplied === 'number' && b.discountApplied > 0 ? (
+                  <Text style={styles.meta}>Member discount: {b.discountApplied}%</Text>
+                ) : null}
                 <Text style={styles.meta}>
-                  {b.date} at {b.time}
+                  {b.scheduledAt
+                    ? new Date(b.scheduledAt).toLocaleString('en-ZA', { dateStyle: 'medium', timeStyle: 'short' })
+                    : `${b.date || '—'} at ${b.time || '—'}`}
                 </Text>
                 {b.notes ? (
                   <ExpandableText

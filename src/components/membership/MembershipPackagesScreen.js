@@ -1,25 +1,14 @@
-// Membership packages + live Firestore status (same DB as membership-web)
+// Membership packages + subscription context (same DB as membership-web)
 import { Ionicons } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
-import React, { useEffect, useMemo, useState } from 'react'
-import {
-  ActivityIndicator,
-  Alert,
-  Linking,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native'
+import React, { useMemo, useState } from 'react'
+import { Alert, Dimensions, Linking, ScrollView, Text, TouchableOpacity, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { PLAN_DISPLAY_NAME, PLAN_ID } from '../../config/subscriptionConfig'
 import { useAuth } from '../../context/AuthContext'
+import { useSubscription } from '../../hooks/useSubscription'
 import { MEMBERSHIP_PACKAGES } from '../../data/membershipPackages'
-import {
-  ENTITLEMENT_LABELS,
-  getEffectivePlanId,
-  mapPlanToEntitlements,
-  subscribeMembership,
-} from '../../services/membershipService'
+import { ENTITLEMENT_LABELS, mapPlanToEntitlements } from '../../services/membershipService'
 import { Colors } from '../../styles/colors'
 import { Typography } from '../../styles/typography'
 import { Constants } from '../../utils/constants'
@@ -48,6 +37,8 @@ const TIER_THEME = {
   },
 }
 
+const cardWidth = Math.min(280, (Dimensions.get('window').width - 48) / 3)
+
 function formatZAR(n) {
   return `R${Number(n).toLocaleString('en-ZA')}`
 }
@@ -62,39 +53,13 @@ function formatDate(iso) {
 export default function MembershipPackagesScreen() {
   const insets = useSafeAreaInsets()
   const { user } = useAuth()
-  const uid = user?.uid || user?.id
+  const sub = useSubscription()
   const isGuest = user?.isAnonymous || !user
   const isDemoAdmin = user?.id === 'demo-admin'
 
   const [memberType, setMemberType] = useState('adults')
-  const [membership, setMembership] = useState(null)
-  const [membershipLoading, setMembershipLoading] = useState(true)
-  const [membershipError, setMembershipError] = useState(null)
 
-  useEffect(() => {
-    if (!uid || isDemoAdmin || isGuest) {
-      setMembership(null)
-      setMembershipLoading(false)
-      return
-    }
-
-    setMembershipLoading(true)
-    setMembershipError(null)
-    const unsub = subscribeMembership(
-      uid,
-      (data) => {
-        setMembership(data)
-        setMembershipLoading(false)
-      },
-      (err) => {
-        setMembershipError(err?.message || 'Could not load membership')
-        setMembershipLoading(false)
-      }
-    )
-    return () => unsub()
-  }, [uid, isDemoAdmin, isGuest])
-
-  const effectivePlanId = useMemo(() => getEffectivePlanId(membership), [membership])
+  const effectivePlanId = sub.plan
   const entitlements = useMemo(() => mapPlanToEntitlements(effectivePlanId), [effectivePlanId])
 
   const plansUrl = `${Constants.PUBLIC_SITE_URL}/plans`
@@ -120,7 +85,7 @@ export default function MembershipPackagesScreen() {
             Life Changing Journey Packages
           </Text>
           <Text style={{ ...Typography.textStyles.bodySmall, color: Colors.textSecondary, marginBottom: 16 }}>
-            Once-off fees in ZAR. Purchase and renew on the website; your status syncs here from the same account.
+            Once-off fees in ZAR. Compare plans side by side; purchase on the website to activate your tier.
           </Text>
 
           <Text style={{ ...Typography.textStyles.captionBold, color: Colors.textPrimary, marginBottom: 8 }}>
@@ -172,16 +137,9 @@ export default function MembershipPackagesScreen() {
                   ? 'Sign in with a real account to see membership synced from the web.'
                   : 'Sign in with the same email you use on the website to see your plan and app benefits.'}
               </Text>
-            ) : membershipLoading ? (
-              <View style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 8 }}>
-                <ActivityIndicator color={Colors.primary} />
-                <Text style={{ ...Typography.textStyles.bodySmall, color: Colors.textSecondary, marginLeft: 10 }}>
-                  Loading…
-                </Text>
-              </View>
-            ) : membershipError ? (
-              <Text style={{ ...Typography.textStyles.bodySmall, color: Colors.error }}>{membershipError}</Text>
-            ) : membership && effectivePlanId ? (
+            ) : sub.loading ? (
+              <Text style={{ ...Typography.textStyles.bodySmall, color: Colors.textSecondary }}>Loading…</Text>
+            ) : effectivePlanId ? (
               <>
                 <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 8, marginBottom: 10 }}>
                   <View
@@ -197,11 +155,12 @@ export default function MembershipPackagesScreen() {
                     </Text>
                   </View>
                   <Text style={{ ...Typography.textStyles.caption, color: Colors.textSecondary }}>
-                    {membership.memberType ? String(membership.memberType) : ''} · Valid to {formatDate(membership.endAt)}
+                    {sub.membership?.memberType ? String(sub.membership.memberType) : ''}
+                    {sub.membership?.endAt ? ` · Valid to ${formatDate(sub.membership.endAt)}` : ''}
                   </Text>
                 </View>
                 <Text style={{ ...Typography.textStyles.bodySmall, color: Colors.textSecondary, marginBottom: 12 }}>
-                  App features below reflect your active plan. Full package list is under each tier.
+                  App features below reflect your active plan. Full package list is in each column.
                 </Text>
                 <Text style={{ ...Typography.textStyles.captionBold, color: Colors.textPrimary, marginBottom: 8 }}>
                   Active app entitlements
@@ -243,58 +202,88 @@ export default function MembershipPackagesScreen() {
                 }}
               >
                 <Text style={{ ...Typography.textStyles.button, color: Colors.white }}>
-                  {membership && effectivePlanId ? 'Manage or upgrade on web' : 'Get membership on web'}
+                  {effectivePlanId ? 'Manage or upgrade on web' : 'Get membership on web'}
                 </Text>
               </LinearGradient>
             </TouchableOpacity>
           </View>
 
-          {MEMBERSHIP_PACKAGES.map((pkg) => {
-            const theme = TIER_THEME[pkg.id] || TIER_THEME.silver
-            const price = pkg.prices[memberType]
-            const isCurrent = effectivePlanId === pkg.id
-            return (
-              <View
-                key={pkg.id}
-                style={{
-                  backgroundColor: Colors.surface,
-                  borderRadius: 16,
-                  padding: 16,
-                  marginBottom: 16,
-                  borderWidth: 2,
-                  borderColor: isCurrent ? theme.border : Colors.lightGray,
-                }}
-              >
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <View>
-                    <Text style={{ ...Typography.textStyles.h4, color: Colors.textPrimary }}>{pkg.name}</Text>
-                    <Text style={{ ...Typography.textStyles.caption, color: Colors.textSecondary, marginTop: 2 }}>
-                      Once-off fee
-                    </Text>
-                  </View>
-                  {isCurrent ? (
-                    <View style={{ backgroundColor: theme.badgeBg, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 }}>
-                      <Text style={{ ...Typography.textStyles.captionBold, color: theme.accent }}>Your plan</Text>
+          <Text style={{ ...Typography.textStyles.h5, color: Colors.textPrimary, marginBottom: 12 }}>
+            Compare plans
+          </Text>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 8, gap: 12 }}
+          >
+            {MEMBERSHIP_PACKAGES.map((pkg) => {
+              const theme = TIER_THEME[pkg.id] || TIER_THEME.silver
+              const price = pkg.prices[memberType]
+              const isCurrent = effectivePlanId === pkg.id
+              return (
+                <View
+                  key={pkg.id}
+                  style={{
+                    width: cardWidth,
+                    minHeight: 320,
+                    backgroundColor: Colors.surface,
+                    borderRadius: 16,
+                    padding: 14,
+                    borderWidth: 2,
+                    borderColor: isCurrent ? theme.border : Colors.lightGray,
+                  }}
+                >
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <View>
+                      <Text style={{ ...Typography.textStyles.h6, color: Colors.textPrimary }}>{pkg.name}</Text>
+                      <Text style={{ ...Typography.textStyles.caption, color: Colors.textSecondary, marginTop: 2 }}>
+                        Once-off
+                      </Text>
                     </View>
+                    {isCurrent ? (
+                      <View style={{ backgroundColor: theme.badgeBg, paddingHorizontal: 6, paddingVertical: 4, borderRadius: 8 }}>
+                        <Text style={{ ...Typography.textStyles.captionBold, color: theme.accent, fontSize: 10 }}>Current</Text>
+                      </View>
+                    ) : null}
+                  </View>
+                  <Text style={{ ...Typography.textStyles.h5, color: theme.accent, marginTop: 8 }}>{formatZAR(price)}</Text>
+                  <Text style={{ ...Typography.textStyles.caption, color: Colors.textLight, marginBottom: 8 }}>
+                    {MEMBER_TYPES.find((m) => m.id === memberType)?.label}
+                  </Text>
+                  {pkg.benefits.slice(0, 6).map((line, idx) => (
+                    <View key={idx} style={{ flexDirection: 'row', alignItems: 'flex-start', marginBottom: 6 }}>
+                      <Ionicons name="checkmark" size={14} color={theme.accent} style={{ marginTop: 2, marginRight: 6 }} />
+                      <Text style={{ ...Typography.textStyles.caption, color: Colors.textPrimary, flex: 1 }}>{line}</Text>
+                    </View>
+                  ))}
+                  {pkg.benefits.length > 6 ? (
+                    <Text style={{ ...Typography.textStyles.caption, color: Colors.textLight }}>+ more on web</Text>
                   ) : null}
                 </View>
-                <Text style={{ ...Typography.textStyles.h5, color: theme.accent, marginTop: 10 }}>
-                  {formatZAR(price)}
-                </Text>
-                <Text style={{ ...Typography.textStyles.caption, color: Colors.textLight, marginBottom: 10 }}>
-                  for {MEMBER_TYPES.find((m) => m.id === memberType)?.label?.toLowerCase()}
-                </Text>
-                {pkg.benefits.map((line, idx) => (
-                  <View key={idx} style={{ flexDirection: 'row', alignItems: 'flex-start', marginBottom: 8 }}>
-                    <Ionicons name="checkmark" size={16} color={theme.accent} style={{ marginTop: 2, marginRight: 8 }} />
-                    <Text style={{ ...Typography.textStyles.bodySmall, color: Colors.textPrimary, flex: 1 }}>{line}</Text>
-                  </View>
-                ))}
-              </View>
-            )
-          })}
+              )
+            })}
+          </ScrollView>
 
-          <TouchableOpacity onPress={openPublicSite} style={{ alignItems: 'center', marginTop: 4 }}>
+          <TouchableOpacity onPress={openWebPlans} style={{ marginTop: 16 }}>
+            <LinearGradient
+              colors={[Colors.primary, Colors.primaryLight]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={{
+                borderRadius: 12,
+                paddingVertical: 14,
+                alignItems: 'center',
+              }}
+            >
+              <Text style={{ ...Typography.textStyles.button, color: Colors.white }}>
+                {effectivePlanId === PLAN_ID.PLATINUM
+                  ? 'Manage on web'
+                  : `Upgrade to ${effectivePlanId === PLAN_ID.SILVER ? PLAN_DISPLAY_NAME[PLAN_ID.GOLD] : PLAN_DISPLAY_NAME[PLAN_ID.PLATINUM]}`}
+              </Text>
+            </LinearGradient>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={openPublicSite} style={{ alignItems: 'center', marginTop: 12 }}>
             <Text style={{ ...Typography.textStyles.caption, color: Colors.info }}>
               {Constants.PUBLIC_SITE_URL.replace(/^https?:\/\//, '')}
             </Text>

@@ -212,6 +212,22 @@ const AdminScreen = ({ navigation, route }) => {
         </TouchableOpacity>
         <Text style={styles.title}>Admin</Text>
         <Text style={styles.subtitle}>Post events, motivations & view bookings</Text>
+        <TouchableOpacity
+          onPress={() => navigation.navigate('AdminBookings')}
+          style={{
+            alignSelf: 'flex-start',
+            marginTop: 10,
+            marginBottom: 8,
+            paddingHorizontal: 12,
+            paddingVertical: 8,
+            borderRadius: 10,
+            backgroundColor: 'rgba(255,255,255,0.2)',
+          }}
+        >
+          <Text style={{ ...Typography.textStyles.captionBold, color: Colors.white }}>
+            Calendly & staff tasks
+          </Text>
+        </TouchableOpacity>
         <View style={styles.tabs}>
           <TouchableOpacity
             style={[styles.tab, tab === 'events' && styles.tabActive]}
@@ -443,6 +459,11 @@ const AdminScreen = ({ navigation, route }) => {
                   bookings.map((b) => (
                     <View key={b.id} style={styles.bookingCard}>
                       <Text style={styles.bookingService}>{b.serviceTitle || 'Booking'}</Text>
+                      {typeof b.priority === 'number' ? (
+                        <Text style={[styles.bookingMeta, { fontWeight: '700', color: Colors.success }]}>
+                          Priority {b.priority} {b.userPlanAtBooking ? `• ${b.userPlanAtBooking}` : ''}
+                        </Text>
+                      ) : null}
                       <Text style={styles.bookingMeta}>
                         {b.userEmail || b.userId} • {b.date} at {b.time}
                       </Text>

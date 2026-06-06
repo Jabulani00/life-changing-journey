@@ -7,6 +7,7 @@ import CustomSplashScreen from './src/components/common/CustomSplashScreen'
 import NetworkStatusBar from './src/components/common/NetworkStatusBar'
 import ErrorBoundary from './src/components/ErrorBoundary'
 import { AuthProvider } from './src/context/AuthContext'
+import { SubscriptionProvider } from './src/context/SubscriptionContext'
 import AppNavigator from './src/navigation/AppNavigator'
 import { DataProvider } from './src/providers/DataProvider'
 import { FontLoader } from './src/providers/FontLoader'
@@ -84,11 +85,13 @@ export default function App() {
           
           <FontLoader onReady={() => setFontsReady(true)}>
             <AuthProvider>
-              <DataProvider>
-                <NetworkStatusBar />
-                <AppNavigator />
-                <StatusBar style="auto" />
-              </DataProvider>
+              <SubscriptionProvider>
+                <DataProvider>
+                  <NetworkStatusBar />
+                  <AppNavigator />
+                  <StatusBar style="auto" />
+                </DataProvider>
+              </SubscriptionProvider>
             </AuthProvider>
           </FontLoader>
         </NetworkProvider>

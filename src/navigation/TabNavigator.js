@@ -8,7 +8,7 @@ import SwipeWrapper from '../components/common/SwipeWrapper'
 import { Colors } from '../styles/colors'
 
 // Import screens
-import BookingScreen from '../screens/main/BookingScreen'
+import BookingScreen from '../screens/BookingScreen'
 import DonationScreen from '../screens/main/DonationScreen'
 import HomeScreen from '../screens/main/HomeScreen'
 import ResourcesScreen from '../screens/main/ResourcesScreen'

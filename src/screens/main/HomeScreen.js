@@ -18,6 +18,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import ServiceCard from '../../components/cards/ServiceCard'
 import LoadingSpinner from '../../components/common/LoadingSpinner'
 import { useAuth } from '../../context/AuthContext'
+import { useSubscription } from '../../hooks/useSubscription'
 import { Colors } from '../../styles/colors'
 import { Typography } from '../../styles/typography'
 import { staticData } from '../../utils/staticData'
@@ -26,6 +27,8 @@ const { width } = Dimensions.get('window')
 
 const HomeScreen = ({ navigation }) => {
   const { user, getUserProfile, admin } = useAuth()
+  const { profile } = useSubscription()
+  const showAdmin = admin || profile?.isAdmin === true
   const insets = useSafeAreaInsets()
   const [userProfile, setUserProfile] = useState(staticData.userProfile)
   const [loading, setLoading] = useState(false)
@@ -378,7 +381,7 @@ const HomeScreen = ({ navigation }) => {
               <Ionicons name="ribbon-outline" size={24} color={Colors.accent} />
               <Text style={{ ...Typography.textStyles.captionBold, color: Colors.textPrimary, marginTop: 8 }}>Membership</Text>
             </TouchableOpacity>
-            {admin && (
+            {showAdmin && (
               <TouchableOpacity
                 style={{
                   backgroundColor: Colors.surface,

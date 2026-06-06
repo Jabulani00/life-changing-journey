@@ -16,11 +16,13 @@ import {
 import CustomButton from '../../components/common/CustomButton'
 import CustomInput from '../../components/common/CustomInput'
 import LoadingSpinner from '../../components/common/LoadingSpinner'
+import { useSubscription } from '../../hooks/useSubscription'
 import { submitContactForm } from '../../services/firebase'
 import { Colors } from '../../styles/colors'
 import { Typography } from '../../styles/typography'
 
 const ContactScreen = ({ navigation }) => {
+  const { hasImmediateResponse } = useSubscription()
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -75,7 +77,10 @@ const ContactScreen = ({ navigation }) => {
     setLoading(true)
 
     try {
-      await submitContactForm(formData)
+      await submitContactForm({
+        ...formData,
+        priorityQueue: hasImmediateResponse,
+      })
       Alert.alert(
         'Message Sent!',
         'Thank you for contacting us. We will get back to you within 24 hours.',

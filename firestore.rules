@@ -34,5 +34,13 @@ service cloud.firestore {
       allow read: if request.auth != null && request.auth.uid == userId;
       allow write: if false;
     }
+    // Staff tasks from app (call reminders, follow-ups). Tighten for production.
+    match /staff_tasks/{taskId} {
+      allow create: if request.auth != null;
+      allow read: if true;
+      // Admin marks tasks done from AdminBookings (tighten with admin claims in production)
+      allow update: if true;
+      allow delete: if false;
+    }
   }
 }
