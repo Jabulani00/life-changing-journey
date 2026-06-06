@@ -1,6 +1,8 @@
 # Admin setup – Life Changing Journey
 
-Admins can post events, manage bookings, set live stream links, and (when implemented) manage motivations and chatbot. Admin status is determined by **email**: if the signed-in user’s email is in the admin list, they see the Admin area.
+Admins can post events, manage bookings, post daily motivations (Daily Word), set live stream links, and publish content that triggers **push notifications** to registered devices. Admin status is determined by **email**: if the signed-in user’s email is in the admin list, they see the Admin area.
+
+See [docs/IMPLEMENTATION_SUMMARY.md](docs/IMPLEMENTATION_SUMMARY.md) for push notification and production setup details.
 
 ---
 
@@ -12,7 +14,9 @@ A default admin account is built in so you can sign in without configuring Fires
 |-------|----------|
 | `life.changing@admin.com` | `Password@??` |
 
-**You must create this user in Supabase first:** Supabase → Authentication → Users → Add user (or use Sign Up in the app once with this email and password). After that, signing in with this email will open the **Admin Dashboard** (admin-only navigation). The app always treats `life.changing@admin.com` as admin even if Firestore `config/admins` is not set.
+**Development only:** This demo admin login works in dev builds only. It is **disabled in production** (`EXPO_PUBLIC_ENV=production` or release builds). For production, use Firebase Auth with an email listed in Firestore `config/admins` or `EXPO_PUBLIC_ADMIN_EMAILS`.
+
+When posting events, daily motivations, or saving live links, the app automatically sends push notifications to all devices that have registered tokens (users must open the app once and allow notifications).
 
 ---
 

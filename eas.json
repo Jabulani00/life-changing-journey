@@ -19,7 +19,22 @@
     },
     "production": {
       "env": {
-        "EXPO_PUBLIC_ENV": "production"
+        "EXPO_PUBLIC_ENV": "production",
+        "EXPO_PUBLIC_LCJ_WEB_URL": "https://www.lifechangingjourney.co.za"
+      },
+      "android": {
+        "buildType": "app-bundle"
+      }
+    },
+    "production-huawei": {
+      "extends": "production",
+      "env": {
+        "EXPO_PUBLIC_ENV": "production",
+        "EXPO_PUBLIC_LCJ_WEB_URL": "https://www.lifechangingjourney.co.za",
+        "EXPO_PUBLIC_STORE_CHANNEL": "huawei"
+      },
+      "android": {
+        "buildType": "apk"
       }
     }
   },
@@ -28,6 +43,10 @@
       "ios": {
         "appleId": "lifechangingjourney84@gmail.com",
         "appleTeamId": "4B3H2MM88X"
+      },
+      "android": {
+        "serviceAccountKeyPath": "./google-play-service-account.json",
+        "track": "internal"
       }
     }
   }

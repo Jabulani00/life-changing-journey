@@ -1,0 +1,339 @@
+﻿LIFE CHANGING JOURNEY
+Terms of Use, Privacy Policy & Legal Policies
+
+Document Version 1.0  ┬╖  Last updated 19 May 2026
+https://www.lifechangingjourney.co.za/legal/terms-and-policies
+
+Platform
+Product
+Mobile App
+Life Changing Journey (Expo / React Native) ΓÇö iOS App Store, Google Play, Huawei AppGallery
+Membership Web
+Next.js app at https://www.lifechangingjourney.co.za
+Related Websites
+lifechangingjourney.co.za and partner service sites linked from the app
+
+ΓÜá  Important: This document was prepared from the project codebase and product documentation to support app-store submission and user transparency. Life Changing Journey Organisation should have a qualified attorney in South Africa review and customise this text before publication ΓÇö especially registration details, tax/VAT, NCR/FSCA wording, professional indemnity, and POPIA registration if required.
+
+1. Definitions
+
+Term
+Meaning
+&quot;LCJ&quot;, &quot;we&quot;, &quot;us&quot;, &quot;our&quot;
+Life Changing Journey Organisation and its authorised representatives operating the Services.
+&quot;You&quot;, &quot;user&quot;, &quot;member&quot;
+Any person who accesses or uses the Services.
+&quot;Services&quot;
+The Life Changing Journey mobile application, membership website, APIs, content, booking tools, membership features, AI assistant (where enabled), and related support channels.
+&quot;Mobile App&quot;
+The Life Changing Journey client application (bundle ID com.lifechangingjourney.app).
+&quot;Membership Web&quot;
+The Next.js membership portal used to register, sign in, purchase membership, and view entitlements.
+&quot;Account&quot;
+A user profile created via Firebase Authentication (email/password) linked to Firestore records.
+&quot;Membership&quot;
+A once-off paid tier (Silver, Gold, or Platinum) recorded in user_memberships with defined entitlements and validity period.
+&quot;Entitlements&quot;
+Feature access derived from your active membership tier (e.g. priority booking, content library, private community).
+&quot;Booking&quot;
+A scheduled appointment or session request stored in our systems and/or Calendly.
+&quot;Partner services&quot;
+Independent businesses or practitioners promoted or linked through LCJ.
+&quot;Third-party providers&quot;
+External platforms that process data on our behalf (e.g. Google Firebase, Stripe, Calendly).
+
+2. Terms of Service (Terms of Use)
+2.1 Agreement
+By downloading, installing, accessing, or using the Services, you agree to these Terms of Service, our Privacy Policy, and any additional terms referenced here. If you do not agree, do not use the Services.
+Where you register an Account, you confirm that the information you provide is accurate and that you have authority to accept these Terms.
+2.2 Description of the Services
+Life Changing Journey provides a digital client portal and community platform that helps users:
+Discover and learn about holistic wellness and related services;
+Create and manage an Account;
+Submit enquiries and contact requests;
+Schedule sessions via integrated booking (including Calendly embed where configured);
+View booking history and membership status;
+Access member-only content and features based on entitlements;
+Connect with LCJ through in-app communication channels;
+Use an optional AI-powered assistant for general information (where enabled).
+The Mobile App is intended as a native client experience, not a substitute for emergency services or crisis intervention.
+2.3 Eligibility
+You must be at least 18 years old to create an Account and purchase Membership, unless we expressly permit supervised use for minors with verifiable parental consent.
+You must have legal capacity to enter into a binding agreement under South African law.
+You may not use the Services if you are barred under applicable law or if we have suspended or terminated your Account.
+2.4 Account Registration & Security
+Accounts are created using email and password via Firebase Authentication.
+You are responsible for safeguarding your credentials and for all activity under your Account.
+Notify us immediately at info@lifechangingjourney.co.za if you suspect unauthorised access.
+We may suspend or terminate Accounts that violate these Terms, pose security risks, or contain false information.
+2.5 Membership & Payments
+Paid Membership is primarily completed on the Membership Web via Stripe Checkout (South African Rand ΓÇö ZAR).
+The Mobile App may display your membership status and entitlements and link you to the web for purchase or upgrade.
+Membership fees, tiers, benefits, discounts, and session limits are described in Section 4 and in-app at the time of purchase.
+Membership is not a subscription to clinical treatment and does not guarantee outcomes, availability of specific practitioners, or immediate service delivery.
+2.6 Bookings & Appointments
+Bookings may be created through Calendly integration, in-app flows, and server webhooks that sync to our database. Booking availability may depend on your membership tier, operating hours, and practitioner schedules. See Section 5 for cancellation, rescheduling, and no-show rules.
+2.7 User Content & Communications
+You may submit information including name, email, phone, messages, service interests, and booking notes. You represent that:
+Your content is lawful and does not infringe third-party rights;
+You will not submit sensitive special personal information unless necessary and with informed consent;
+We may use your submissions to respond, provide Services, improve operations, and maintain records as described in the Privacy Policy.
+2.8 Prohibited Conduct
+See Section 6 ΓÇö Acceptable Use Policy.
+2.9 Third-Party Services & Links
+The Services may link to or embed third-party websites, payment pages, scheduling tools, social media, partner businesses, and educational content. We do not control third-party terms or privacy practices. Your use of those services is at your own risk.
+2.10 Service Changes & Availability
+We may modify, suspend, or discontinue any part of the Services with reasonable notice where practicable. We do not guarantee uninterrupted or error-free operation.
+2.11 Termination
+By you: You may stop using the Services and request Account deletion (see Section 12).
+By us: We may suspend or terminate access for breach of Terms, fraud, abuse, legal requirements, or prolonged inactivity.
+Upon termination, rights granted to you cease; provisions that by nature should survive remain in effect.
+2.12 Disclaimers
+THE SERVICES ARE PROVIDED &quot;AS IS&quot; AND &quot;AS AVAILABLE&quot; WITHOUT WARRANTIES OF ANY KIND, WHETHER EXPRESS OR IMPLIED, INCLUDING MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT. See also Sections 7 and 8.
+2.13 Limitation of Liability
+To the fullest extent permitted by South African law:
+LCJ and its directors, employees, contractors, and partners are not liable for indirect, incidental, special, consequential, or punitive damages, or for loss of profits, data, goodwill, or business interruption.
+Our total aggregate liability for claims shall not exceed the greater of: (a) the amount you paid to LCJ in the 12 months before the claim; or (b) ZAR 1,000.
+Nothing in these Terms excludes liability that cannot be excluded by law.
+2.14 Indemnity
+You agree to indemnify and hold harmless LCJ against claims, damages, losses, and expenses (including reasonable legal fees) arising from your breach of these Terms, misuse of the Services, or violation of any law or third-party rights.
+2.15 Governing Law & Disputes
+These Terms are governed by the laws of the Republic of South Africa. Disputes shall first be addressed through good-faith negotiation. If unresolved, parties submit to the exclusive jurisdiction of the courts of South Africa in the province where LCJ is domiciled (currently KwaZulu-Natal).
+2.16 Changes to These Terms
+We may update these Terms by posting a revised version with a new Last updated date. Material changes may be notified in-app or by email. Continued use after the effective date constitutes acceptance.
+2.17 Language
+The authoritative version of these documents is English. Translations, if provided, are for convenience only.
+
+3. Privacy Policy
+3.1 Who We Are
+Life Changing Journey Organisation (&quot;LCJ&quot;) is the responsible party for personal information processed through the Services, unless stated otherwise for a specific partner service. Contact: See Section 15.
+3.2 Scope
+This Privacy Policy applies to personal information collected through:
+The Life Changing Journey Mobile App;
+The Membership Web and checkout flows;
+Contact forms, booking flows, and support channels;
+Cloud Functions and webhooks (e.g. Calendly ΓåÆ Firestore);
+Optional features such as push notifications and AI chat (when enabled).
+3.3 Summary
+
+We Do
+We Do Not (by default)
+Collect information you provide when registering, booking, contacting us, or purchasing membership
+Sell your personal information to data brokers
+Use Firebase to authenticate and store profile, booking, and membership data
+Use your data for unrelated third-party advertising
+Use payment processors (Stripe) for membership purchases on the web
+Store full card numbers on LCJ servers (handled by Stripe)
+Use scheduling tools (Calendly) when you book appointments
+Guarantee absolute security (we apply reasonable safeguards)
+3.4 Information We Collect
+A. Information You Provide Directly
+
+Category
+Examples
+Purpose
+Account
+Email, password (hashed by Firebase), display name
+Authentication, profile
+Profile
+Full name, plan tier, member category
+Personalisation, entitlements
+Contact
+Name, email, phone, subject, message, service interest
+Respond to enquiries
+Booking
+Service type, date/time, notes, Calendly event details
+Scheduling, history, staff follow-up
+Membership
+Plan purchased, member type, transaction references
+Entitlements, receipts, support
+Communications
+Support emails, WhatsApp messages initiated by you
+Customer service
+B. Information Collected Automatically
+
+Category
+Examples
+Purpose
+Device & App
+Device type, OS version, app version, crash logs
+Stability, security
+Usage
+Screens viewed, feature interactions (if analytics enabled)
+Improve Services
+Notifications
+Push token (if you opt in)
+Booking reminders, updates
+Permissions-based
+Camera/photos, phone, location (only if granted)
+Feature delivery per permission prompt
+C. Information from Third Parties
+
+Source
+Data
+Stripe
+Payment status, checkout session ID, amount, currency ΓÇö not full card data
+Calendly
+Invitee name, email, scheduled event time, cancellation status
+Firebase
+Authentication identifiers (uid), security events
+App Stores
+Download region, purchase receipts (for store billing if ever used)
+3.5 How We Use Personal Information
+We process personal information to:
+Provide and maintain the Services;
+Authenticate users and enforce entitlements;
+Process membership purchases and record transactions;
+Schedule, confirm, and manage bookings;
+Communicate with you (responses, reminders where enabled, service updates);
+Operate admin tools for staff (booking queue, tasks, events);
+Improve security, prevent fraud and abuse;
+Comply with legal obligations;
+Send marketing only where you have opted in (you may opt out at any time).
+Legal bases (POPIA): consent, contract performance, legitimate interests, and legal obligation.
+3.6 Sharing & Disclosure
+
+Recipient
+Reason
+Service providers
+Hosting (Google Cloud / Firebase), payments (Stripe), scheduling (Calendly), email delivery, AI API (Google Gemini ΓÇö if chatbot enabled)
+Partner practitioners / businesses
+Only as needed to fulfil a service you requested (e.g. referral to financial or psychology partner)
+Authorities
+When required by law, court order, or to protect rights and safety
+Business transfers
+In connection with merger, acquisition, or asset sale (with notice where required)
+
+We do not sell personal information.
+3.7 International Transfers
+Firebase, Stripe, Calendly, and other providers may process data in countries outside South Africa (including the United States and European Union). Where required, we rely on appropriate safeguards (contractual clauses, provider certifications, and your consent where applicable).
+3.8 Retention
+
+Data Type
+Typical Retention
+Account & profile
+While Account is active + reasonable period after deletion request
+Bookings & contacts
+As needed for operations, disputes, and legal record-keeping (often up to 5 years unless longer required)
+Transactions
+As required for tax and financial record-keeping
+Logs & security
+Short to medium term unless needed for incident investigation
+3.9 Security
+We implement administrative, technical, and organisational measures including:
+Firebase Authentication and Firestore access rules;
+HTTPS for web and API traffic;
+Stripe-hosted checkout for card payments;
+Least-privilege access for administrators.
+No system is 100% secure. Report concerns to info@lifechangingjourney.co.za.
+3.10 Your Rights
+Subject to POPIA and applicable law, you may:
+Access personal information we hold about you;
+Correct inaccurate information;
+Delete information (see Section 12);
+Object to or restrict certain processing;
+Withdraw consent where processing is consent-based;
+Lodge a complaint with the Information Regulator (South Africa).
+We will respond within a reasonable period (typically 30 days).
+3.11 Automated Decision-Making & AI Assistant
+Where the in-app assistant (e.g. powered by Google Gemini) is enabled:
+Responses are informational only, not professional advice;
+Do not submit highly sensitive health or financial details you would not share in an open channel;
+Conversations may be processed by the AI provider according to their terms.
+We do not make solely automated decisions with legal or similarly significant effects without human review.
+3.12 Changes to This Privacy Policy
+We will post updates with a revised Last updated date. Material changes may be highlighted in-app or on the website.
+
+4. Membership & Payment Terms
+4.1 Membership Model
+LCJ offers once-off membership packages in South African Rand (ZAR), tiered as Silver, Gold, and Platinum:
+
+Tier
+Children (ZAR)
+Adults (ZAR)
+Couples (ZAR)
+Silver
+100
+100
+100
+Gold
+199
+299
+499
+Platinum
+399
+599
+899
+
+Prices and benefits shown in-app or on the Membership Web at checkout are authoritative if they differ from this table.
+4.2 Purchase Channel
+Primary checkout: Membership Web (/plans) via Stripe Checkout.
+Mobile App: Displays status and may deep-link or open the web for payment. The app does not store card details.
+When Stripe is not configured in a development environment, a mock payment mode may be used ΓÇö not for production consumer billing.
+4.3 Activation & Entitlements
+Membership becomes active after successful payment confirmation (Stripe webhook / server verification).
+Entitlements (e.g. priority booking, content library, private community, coaching session caps) are defined per tier.
+If status is not active or endAt has passed, entitlements may be suspended on the client and server.
+4.4 Benefits (Summary)
+Silver: Community access, service information, updates;
+Gold: Priority booking, discounts, reminders, progress tracking, content library, monthly coaching session allocation;
+Platinum: Enhanced discounts, 24-hour booking access window, call reminders, private community, meditation and weekly progress session allocations, broader content access.
+Exact entitlements are implemented in software and may be updated with notice.
+4.5 Discounts & Session Limits
+Booking discounts: Gold (10%), Platinum (20%) where applicable in booking flows.
+Monthly session caps (examples): Gold ΓÇö 1 coaching session/month; Platinum ΓÇö coaching, meditation, and weekly progress sessions per configured limits.
+4.6 Refunds & Cancellations
+Unless required by South African consumer law or expressly stated at purchase:
+Membership fees are generally non-refundable once activated, except where we cancel the membership or fail to provide the purchased digital entitlements.
+Chargebacks: Fraudulent chargebacks may result in Account suspension.
+Refund requests: info@lifechangingjourney.co.za with proof of purchase and reason.
+4.7 Taxes
+Prices may be inclusive or exclusive of VAT as indicated at checkout. Tax invoices will be provided where applicable and required by law.
+4.8 Failed Payments
+If payment fails or is pending, membership will not activate until confirmation. Do not rely on entitlements until your dashboard shows an active status.
+
+5. Booking & Scheduling Terms
+5.1 How Booking Works
+Bookings may be made through:
+Calendly embed in the Mobile App (when EXPO_PUBLIC_CALENDLY_EMBED_URL is configured);
+Legacy or supplementary in-app booking flows writing to Firestore bookings;
+Calendly webhooks (Cloud Functions) syncing invitee.created / invitee.canceled events.
+You must be signed in for bookings to attach to your Account where required.
+5.2 Operating Hours & Tier Access
+Non-Platinum tiers may be limited to booking UI during configured operating hours (e.g. 08:00ΓÇô18:00 local time).
+Platinum may include extended / 24-hour booking access as described in-product.
+5.3 Confirmation & Status
+Bookings may show statuses such as pending, confirmed, completed, or cancelled. Confirmation depends on practitioner availability and manual review where applicable.
+5.4 Cancellations & Rescheduling
+Cancel or reschedule through Calendly where available, or contact us at info@lifechangingjourney.co.za / +27 31 035 0208.
+Provide at least 24 hours notice where possible to avoid fees or forfeiture of session allocations.
+Repeated no-shows may limit future booking privileges.
+5.5 Reminders
+Gold and Platinum tiers may include reminder features (in-app flags, staff tasks). Push/email delivery depends on device permissions and infrastructure ΓÇö not guaranteed in all builds.
+5.6 Third-Party Scheduling
+When you use Calendly, their privacy policy and terms also apply. We receive event data necessary to display your bookings in the app.
+
+6. Acceptable Use Policy
+You agree not to:
+Violate any applicable law or regulation;
+Impersonate any person or misrepresent affiliation with LCJ or partners;
+Harass, threaten, defame, or discriminate against others;
+Upload malware, scrape, reverse engineer, or attempt unauthorised access to systems;
+Use the Services for spam, pyramid schemes, or unauthorised commercial solicitation;
+Collect other users data without consent;
+Submit false booking or payment information;
+Circumvent membership entitlements, session limits, or security controls;
+Use the AI assistant to generate illegal, harmful, or explicit content;
+Record or distribute confidential sessions without consent of all parties and applicable law.
+We may investigate violations and cooperate with law enforcement where required.
+
+7. Health, Wellness & Professional Services Disclaimer
+Not medical care: The Services and content are for general information, education, and support. They do not constitute medical, psychiatric, psychological diagnosis, or treatment.
+Emergency: If you are in crisis or may harm yourself or others, contact emergency services immediately (South Africa: 112 / 10111). The app is not an emergency service.
+Qualified professionals: Psychology, hypnotherapy, spiritual, and integrated services may be delivered by independent practitioners. LCJ facilitates access and information; clinical responsibility lies with the licensed provider conducting the session.
+No guarantee of outcomes: Wellness journeys are individual. We do not guarantee specific health, mental health, or spiritual outcomes.
+Your responsibility: Consult a qualified healthcare provider before making health decisions. Do not discontinue prescribed treatment based on app content.
+Children: Services for children require parental/guardian involvement and appropriate professional consent.
+
+8. Financial Services Disclaimer
+Separate regulated entities: Financial guidance, loans, and credit services promoted through LCJ may be offered by Tshabalala Omhle Financial Group or other NCR-registered providers (e.g. registration NCRCP20083 where

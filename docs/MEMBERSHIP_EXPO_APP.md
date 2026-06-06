@@ -4,6 +4,8 @@ This document describes what was implemented to align the **Life Changing Journe
 
 For the **Next.js membership web** (`membership-web/`), see `membership-web/MEMBERSHIP_WEB_STATUS.md`.
 
+For **production readiness, terms acceptance, push notifications, and store config**, see [IMPLEMENTATION_SUMMARY.md](IMPLEMENTATION_SUMMARY.md).
+
 ---
 
 ## What was implemented
@@ -40,7 +42,7 @@ For the **Next.js membership web** (`membership-web/`), see `membership-web/MEMB
 - **Guest / demo admin** messaging: explains signing in with the same account as the web.
 - **Primary CTA:** opens **`{PUBLIC_SITE_URL}/plans`** for purchase or upgrade (hosted checkout remains on the web).
 - **Disclaimer** text (guidance only; not medical advice; financial services).
-- **`Constants.PUBLIC_SITE_URL`** — base URL for the site; override with **`EXPO_PUBLIC_LCJ_WEB_URL`** if the deployed membership URL differs.
+- **`Constants.PUBLIC_SITE_URL`** — defaults to **`https://www.lifechangingjourney.co.za`** in all builds. Override only with **`EXPO_PUBLIC_LCJ_WEB_URL`** (e.g. LAN IP when testing local `membership-web`).
 
 ### 7. Navigation & discovery
 
@@ -54,7 +56,7 @@ For the **Next.js membership web** (`membership-web/`), see `membership-web/MEMB
 | Task | Why |
 |------|-----|
 | **Deploy Firestore rules** (`firebase deploy --only firestore:rules` or copy rules into Firebase Console) | Without the `user_memberships` rule, client reads will fail or fall back to errors. |
-| Set **`EXPO_PUBLIC_LCJ_WEB_URL`** in Expo env (if needed) | Ensures the in-app “Open web plans” link points at your real membership deployment. |
+| Set **`EXPO_PUBLIC_LCJ_WEB_URL`** only when testing against local `membership-web` | Production and EAS builds already use `https://www.lifechangingjourney.co.za` via `eas.json`. |
 
 ---
 
@@ -93,7 +95,7 @@ For the **Next.js membership web** (`membership-web/`), see `membership-web/MEMB
 | Package copy | `src/data/membershipPackages.js` |
 | Web plans (source of truth for API) | `membership-web/src/lib/plans.ts` |
 | Web entitlements | `membership-web/src/lib/entitlements.ts` |
-| Public site URL | `src/utils/constants.js` (`PUBLIC_SITE_URL`) — in **`__DEV__`** defaults to `http://localhost:3000` (local `membership-web`); production builds use `https://www.lifechangingjourney.co.za`. Override anytime with **`EXPO_PUBLIC_LCJ_WEB_URL`** (e.g. LAN IP for a physical device). |
+| Public site URL | `src/utils/constants.js` (`PUBLIC_SITE_URL`) — defaults to `https://www.lifechangingjourney.co.za`. Override with **`EXPO_PUBLIC_LCJ_WEB_URL`** only for local dev. |
 | Rules | `firestore.rules` |
 | Navigator | `src/navigation/MainNavigator.js` |
 | Home entry | `src/screens/main/HomeScreen.js` |

@@ -5,6 +5,7 @@ import {
   getUserProfileFromFirestore,
   isAdmin as checkFirebaseAdmin,
   registerWithEmailAndPassword,
+  resetPasswordWithEmail,
   signInWithEmail,
   signOutFirebase,
   subscribeToAuthState,
@@ -22,6 +23,10 @@ const AuthContext = createContext({})
 const DEFAULT_ADMIN_EMAIL = 'life.changing@admin.com'
 const DEFAULT_ADMIN_PASSWORD = 'Password@??'
 const DEMO_ADMIN_STORAGE_KEY = 'life_changing_journey_demo_admin'
+
+const isProductionBuild =
+  process.env.EXPO_PUBLIC_ENV === 'production' ||
+  (typeof __DEV__ !== 'undefined' && !__DEV__)
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
@@ -74,6 +79,7 @@ export const AuthProvider = ({ children }) => {
   // Firebase Auth state + restore demo admin from storage
   useEffect(() => {
     const restoreDemoAdmin = async () => {
+      if (isProductionBuild) return false
       try {
         const stored = await AsyncStorage.getItem(DEMO_ADMIN_STORAGE_KEY)
         if (stored) {
@@ -170,7 +176,9 @@ export const AuthProvider = ({ children }) => {
   const signIn = async (email, password) => {
     const trimmedEmail = (email || '').trim().toLowerCase()
     const isDefaultAdmin =
-      trimmedEmail === DEFAULT_ADMIN_EMAIL.toLowerCase() && password === DEFAULT_ADMIN_PASSWORD
+      !isProductionBuild &&
+      trimmedEmail === DEFAULT_ADMIN_EMAIL.toLowerCase() &&
+      password === DEFAULT_ADMIN_PASSWORD
 
     if (isDefaultAdmin) {
       setLoading(true)
@@ -251,17 +259,20 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
-  // Reset password function
   const resetPassword = async (email) => {
-  if (!enableAuth) return { data: null, error: new Error('Auth disabled') }
-  try {
-      const { data, error } = await supabase.auth.resetPasswordForEmail(email)
-      
-      if (error) throw error
-      
-      return { data, error: null }
+    const trimmed = (email || '').trim().toLowerCase()
+    if (!trimmed) return { data: null, error: new Error('Email is required') }
+    try {
+      await resetPasswordWithEmail(trimmed)
+      return { data: {}, error: null }
     } catch (error) {
-      return { data: null, error }
+      if (enableAuth && isSupabaseConfigured) {
+        try {
+          const { data, error: sbError } = await supabase.auth.resetPasswordForEmail(trimmed)
+          if (!sbError) return { data, error: null }
+        } catch (_) {}
+      }
+      return { data: null, error: { message: error?.message || 'Could not send reset email' } }
     }
   }
 

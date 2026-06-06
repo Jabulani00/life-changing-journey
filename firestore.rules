@@ -34,5 +34,15 @@ service cloud.firestore {
       allow read: if request.auth != null && request.auth.uid == userId;
       allow write: if false;
     }
+    // Daily motivations (Daily Word feed)
+    match /motivations/{motivationId} {
+      allow read: if true;
+      allow create, update, delete: if true;
+    }
+    // Expo push tokens — devices register on app open; admin reads to broadcast notifications
+    match /push_tokens/{tokenId} {
+      allow read: if true;
+      allow create, update, delete: if true;
+    }
   }
 }

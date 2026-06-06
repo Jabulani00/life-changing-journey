@@ -18,7 +18,7 @@ const ResourcesScreen = ({ navigation }) => {
     { id: 'instagram', title: 'Instagram', icon: 'logo-instagram', color: '#E1306C', url: 'https://www.instagram.com/lifechanging_journey?igsh=ZjF5ZjBoZWU1NXQx' },
     { id: 'youtube', title: 'YouTube', icon: 'logo-youtube', color: '#FF0000', url: 'https://www.youtube.com/@lifechangingjourney-h4j' },
     { id: 'tiktok', title: 'TikTok', icon: 'logo-tiktok', color: '#000000', url: 'https://www.tiktok.com/@lifechangingjourney' },
-    { id: 'website', title: 'Website', icon: 'globe-outline', color: Colors.primary, url: 'https://lifechangingjourney.co.za' },
+    { id: 'website', title: 'Website', icon: 'globe-outline', color: Colors.primary, url: 'https://www.lifechangingjourney.co.za' },
     { id: 'whatsapp', title: 'WhatsApp', icon: 'logo-whatsapp', color: '#25D366', url: 'https://wa.me/27310350208' },
   ]
 

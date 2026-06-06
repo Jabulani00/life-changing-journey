@@ -9,6 +9,7 @@ import {
   Platform,
   Alert,
   StyleSheet,
+  Linking,
 } from 'react-native'
 import { StatusBar } from 'expo-status-bar'
 import { Ionicons } from '@expo/vector-icons'
@@ -18,6 +19,7 @@ import CustomButton from '../../components/common/CustomButton'
 import { GlobalStyles } from '../../styles/globalStyles'
 import { Colors } from '../../styles/colors'
 import { Typography } from '../../styles/typography'
+import { TERMS_LEGAL_URL } from '../../data/termsAndPolicies'
 
 const RegisterScreen = ({ navigation }) => {
   const [formData, setFormData] = useState({
@@ -28,6 +30,7 @@ const RegisterScreen = ({ navigation }) => {
   })
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState({})
+  const [termsChecked, setTermsChecked] = useState(false)
 
   const { signUp } = useAuth()
 
@@ -59,6 +62,10 @@ const RegisterScreen = ({ navigation }) => {
   }
 
   const handleRegister = async () => {
+    if (!termsChecked) {
+      Alert.alert('Terms required', 'Please agree to our Terms of Service and Privacy Policy to create an account.')
+      return
+    }
     if (!validateForm()) return
     setLoading(true)
     try {
@@ -161,9 +168,24 @@ const RegisterScreen = ({ navigation }) => {
             />
           </View>
 
-          <Text style={[GlobalStyles.smallText, { textAlign: 'center', lineHeight: 18, marginBottom: 20 }]}>
-            By signing up you agree to our Terms of Service and Privacy Policy.
-          </Text>
+          <TouchableOpacity
+            style={styles.termsRow}
+            onPress={() => setTermsChecked((v) => !v)}
+            activeOpacity={0.8}
+          >
+            <View style={[styles.termsCheckbox, termsChecked && styles.termsCheckboxChecked]}>
+              {termsChecked ? <Ionicons name="checkmark" size={14} color={Colors.white} /> : null}
+            </View>
+            <Text style={[GlobalStyles.smallText, { flex: 1, lineHeight: 18 }]}>
+              I agree to the{' '}
+              <Text
+                style={styles.linkText}
+                onPress={() => Linking.openURL(TERMS_LEGAL_URL).catch(() => {})}
+              >
+                Terms of Service and Privacy Policy
+              </Text>
+            </Text>
+          </TouchableOpacity>
 
           <CustomButton title="Create account" onPress={handleRegister} loading={loading} style={{ marginBottom: 24 }} />
 
@@ -210,6 +232,18 @@ const styles = StyleSheet.create({
     fontWeight: Typography.fontWeight.medium,
   },
   footerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap' },
+  termsRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginBottom: 20 },
+  termsCheckbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 5,
+    borderWidth: 2,
+    borderColor: Colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 2,
+  },
+  termsCheckboxChecked: { backgroundColor: Colors.primary },
 })
 
 export default RegisterScreen

@@ -27,7 +27,8 @@ Use this checklist before submitting your app to the App Store.
 - [x] Camera usage description added (if used)
 - [x] Photo library usage description added (if used)
 - [x] Location usage description added (if used)
-- [ ] Privacy policy URL ready (required for App Store)
+- [x] Privacy policy URL in app config: `https://www.lifechangingjourney.co.za/legal/terms-and-policies`
+- [x] First-install terms acceptance gate implemented (`TermsAcceptanceScreen`)
 
 ## ✅ URL Schemes
 
@@ -69,6 +70,9 @@ Use this checklist before submitting your app to the App Store.
 - [ ] Test in portrait orientation
 - [ ] Test network connectivity handling
 - [ ] Test error scenarios
+- [ ] Test first-install terms acceptance flow
+- [ ] Test push notifications (physical device + EAS/dev build; configure APNs via `eas credentials`)
+- [ ] Test notification tap opens Events / Motivations / Live
 
 ## ✅ Build & Submit
 

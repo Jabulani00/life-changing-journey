@@ -2,6 +2,8 @@
 
 This document maps the **User Stories & Feature Requirements** to the current codebase and lists **gaps** and **suggested implementation order**.
 
+For a full record of recent production work (terms gate, URLs, store config, push notifications), see [docs/IMPLEMENTATION_SUMMARY.md](docs/IMPLEMENTATION_SUMMARY.md).
+
 ---
 
 ## 0. Authentication & Role-Based Access (User / Admin Logins)
@@ -59,7 +61,8 @@ This document maps the **User Stories & Feature Requirements** to the current co
 |------------|--------|----------------|
 | User: View upcoming events | ✅ Done | `EventsScreen.js` – `getEvents()` |
 | User: View full event details | ✅ Done | Title, date, description, location in cards |
-| User: Notifications for upcoming events | ❌ **Missing** | No push/local notifications |
+| User: Notifications when new event posted | ✅ Done | `expo-notifications` – `notifyNewEvent()` on admin post; tap opens `Events` |
+| User: Reminder before event date | ❌ **Missing** | No scheduled local/remote reminder (e.g. 1 day before) |
 | Admin: Create and publish events | ✅ Done | `AdminScreen` – Post event form, `addEvent()` |
 | Admin: Edit or delete events | ❌ **Missing** | No `updateEvent` / `deleteEvent` in Firebase or UI |
 | Admin: Upload event posters/images | ❌ **Missing** | No image field or storage (e.g. Firebase Storage) |
@@ -68,26 +71,25 @@ This document maps the **User Stories & Feature Requirements** to the current co
 - **Firebase**: `updateEvent(id, data)`, `deleteEvent(id)`; optional `imageUrl` and Firebase Storage upload helper.
 - **AdminScreen**: Edit/delete buttons per event; optional image picker and upload.
 - **EventsScreen**: Show image when `event.imageUrl` exists.
-- **Notifications**: Later phase – integrate expo-notifications and trigger for upcoming event (e.g. 1 day before).
+- **Notifications**: Optional scheduled reminder before event date (push on create is done).
 
 ---
 
-## 4. Feature 4: Daily Motivations / Quotes
+## 4. Feature 4: Daily Motivations / Quotes (Daily Word)
 
 | User Story | Status | Where in Code |
 |------------|--------|----------------|
-| User: See daily motivational quotes | ⚠️ **Partial** | `HomeScreen` has random quote from `staticData.inspirationalQuotes` but not prominent/dedicated |
-| User: Browse previous motivation posts | ❌ **Missing** | No dedicated screen or feed from backend |
+| User: See daily motivational quotes | ✅ Done | `MotivationsScreen.js` – feed from Firestore; `HomeScreen` quick action “Daily Word” |
+| User: Browse previous motivation posts | ✅ Done | `MotivationsScreen.js` – `getMotivations()`, category filters |
+| User: Push when new daily word posted | ✅ Done | `notifyNewDailyWord()` on admin post; tap opens `Motivations` |
 | User: Save favorite quotes | ❌ **Missing** | No favorites storage or UI |
-| Admin: Post daily motivations | ❌ **Missing** | No motivations in Firebase, no admin UI |
-| Admin: Schedule / manage old posts | ❌ **Missing** | No schedule or CRUD |
+| Admin: Post daily motivations | ✅ Done | `AdminScreen` Motivations tab – `addMotivation()` |
+| Admin: Edit / delete / schedule posts | ❌ **Missing** | Create only; no update/delete/schedule |
 
 **Gaps to implement**
-- **Firebase**: New collection `motivations` (e.g. `text`, `author`, `scheduledFor`, `createdAt`). Optional `order` or “daily” logic (e.g. one per day).
-- **Firebase**: `getMotivations()`, `addMotivation()`, `updateMotivation()`, `deleteMotivation()`.
-- **App**: “Daily motivation” or “Motivations” screen – list/calendar of motivations; today’s quote prominent.
-- **App**: Favorites – e.g. `user_favorite_quotes` (userId + motivationId) or AsyncStorage for anonymous; “Save” on quote card.
-- **AdminScreen**: New tab “Motivations” – create, edit, delete, optional schedule date.
+- **Firebase**: `updateMotivation()`, `deleteMotivation()`; optional `scheduledFor`.
+- **App**: Favorites – e.g. `user_favorite_quotes` or AsyncStorage; “Save” on quote card.
+- **AdminScreen**: Edit/delete per motivation; optional schedule date.
 
 ---
 
@@ -95,17 +97,16 @@ This document maps the **User Stories & Feature Requirements** to the current co
 
 | User Story | Status | Where in Code |
 |------------|--------|----------------|
-| User: Watch YouTube Live in app | ❌ **Missing** | No embed or WebView |
-| User: Watch Facebook Live in app | ❌ **Missing** | No embed or WebView |
-| User: Notifications when live starts | ❌ **Missing** | No push/live detection |
-| Admin: Post live stream links | ❌ **Missing** | No config for active stream URL(s) |
-| Admin: Control which streams are active | ❌ **Missing** | No “active” flag or priority |
+| User: Open YouTube Live link | ✅ Done | `LiveScreen.js` – opens URL via `Linking` |
+| User: Open Facebook Live link | ✅ Done | `LiveScreen.js` – opens URL via `Linking` |
+| User: In-app embed (WebView) | ❌ **Missing** | Link-out only; no embed |
+| User: Push when admin saves live links | ✅ Done | `notifyLiveStreamUpdated()` on admin save; tap opens `Live` |
+| Admin: Post live stream links | ✅ Done | `AdminScreen` Live tab – `setLiveStreamConfig()` → `config/liveStream` |
+| Admin: “Active” flag / stream priority | ❌ **Missing** | URLs only; no `isActive` or scheduled go-live |
 
 **Gaps to implement**
-- **Firebase**: Config or collection for “live stream” (e.g. `config/liveStream` or `streams` with `platform`, `url`, `isActive`, `scheduledAt`).
-- **App**: “Live” or “Watch” screen – WebView or embed (e.g. react-native-youtube-iframe for YouTube; Facebook may require in-app browser or link-out with fallback).
-- **AdminScreen**: Form to set YouTube URL, Facebook URL, and “active” stream; optional “Go live” time for notifications.
-- **Notifications**: “Live started” push when admin marks stream active (or integrate with platform APIs if needed).
+- **App**: Optional WebView/embed for in-app viewing.
+- **AdminScreen**: “Go live” toggle or scheduled time; optional auto-detect from platform APIs.
 
 ---
 
@@ -130,9 +131,13 @@ This document maps the **User Stories & Feature Requirements** to the current co
 
 | Requirement | Status | Notes |
 |-------------|--------|--------|
+| First-install terms acceptance | ✅ Done | `TermsAcceptanceScreen`, `termsService.js` — see IMPLEMENTATION_SUMMARY.md |
+| Production store config (iOS/Android/Huawei) | ✅ Done | `app.json`, `eas.json` production profiles |
+| Canonical site URL | ✅ Done | `https://www.lifechangingjourney.co.za` |
+| Push notifications (expo-notifications) | ✅ Done | Daily Word, Events, Live — see IMPLEMENTATION_SUMMARY.md |
 | App loads fast | ✅ Addressed | Lazy Firebase init, static data fallback |
-| Secure handling of data | ✅ Addressed | Auth via Supabase; Firebase rules needed for production |
-| Clean admin dashboard | ⚠️ Partial | AdminScreen exists; can be refined with tabs and filters |
+| Secure handling of data | ⚠️ Partial | Firebase Auth; Firestore rules still open on several collections |
+| Clean admin dashboard | ⚠️ Partial | `AdminScreen` + `AdminDashboardScreen`; tabs for events, bookings, motivations, live |
 | Scalable architecture | ✅ Addressed | Firebase/Supabase, separation of concerns |
 
 **Non-functional**
@@ -150,9 +155,9 @@ This document maps the **User Stories & Feature Requirements** to the current co
 1. **Authentication & role-based access** (Section 0) – user and admin logins; admin-only navigation and dashboard so admin has their own entry and layout (app stays user-side for regular users). **Do this first** so admin and user see correct pages after login.
 2. **Booking notes + Admin booking actions** (Features 1 & 2) – small, high impact.
 3. **Events: edit/delete** (Feature 3) – no new collection; extend existing.
-4. **Daily motivations backend + screen + admin** (Feature 4) – new collection and UI.
-5. **Events: images + notifications** (Feature 3) – optional polish.
-6. **Live streaming** (Feature 5) – new screen + config.
+4. ~~**Daily motivations backend + screen + admin** (Feature 4)~~ — Done; add favorites/edit/delete.
+5. **Events: edit/delete + images** (Feature 3) – polish; push on create is done.
+6. ~~**Live streaming screen + config** (Feature 5)~~ — Done; add in-app embed if desired.
 7. **AI Chatbot** (Feature 6) – FAQs + chat UI.
 
 ---
@@ -163,9 +168,11 @@ This document maps the **User Stories & Feature Requirements** to the current co
 - [ ] **Auth**: User and admin can log in; each sees the correct experience (user → user app, admin → admin dashboard and admin-only navigation).
 - [ ] **Admin**: Admin has their own navigation and dashboard (separate from user app); admin routes are protected by role.
 - [ ] Booking supports notes; admin can approve/reschedule/cancel.
-- [ ] Events: create, edit, delete; optional images and notifications.
-- [ ] Motivations: daily/browse + favorites; admin CRUD.
-- [ ] Live: watch in-app; admin sets links and active stream.
+- [ ] Events: edit, delete; optional images. (Create + push on create: done.)
+- [ ] Motivations: favorites; admin edit/delete/schedule. (Feed + admin post + push: done.)
+- [ ] Live: in-app embed optional. (Link-out + admin config + push: done.)
+- [x] Terms acceptance on first install.
+- [x] Push notifications for new event, daily word, and live links.
 - [ ] Chatbot: FAQs and in-app help; admin config.
 - [ ] UI feels modern, premium, inspiring.
 - [ ] System is scalable (Firebase/Supabase used consistently).

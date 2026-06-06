@@ -43,7 +43,7 @@ const HypnotherapyScreen = () => {
           <CustomButton
             title="Visit"
             icon={<Ionicons name="paper-plane-outline" size={16} color={Colors.white} />}
-            onPress={() => handleWebsitePress('https://lifechangingjourney.co.za')}
+            onPress={() => handleWebsitePress('https://www.lifechangingjourney.co.za')}
             style={{ marginBottom: 10 }}
           />
           

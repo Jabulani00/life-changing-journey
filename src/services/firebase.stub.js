@@ -59,3 +59,15 @@ export async function getMotivations() {
 export async function addMotivation() {
   throw new Error(notInstalled);
 }
+
+export async function savePushToken() {
+  return null;
+}
+
+export async function getAllPushTokens() {
+  return [];
+}
+
+export async function removePushToken() {
+  return null;
+}

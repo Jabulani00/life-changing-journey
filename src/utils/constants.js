@@ -13,32 +13,34 @@ export const Constants = {
   
   // Contact Information
   CONTACT: {
-    email: 'info@lifechangingjourneyapp.com',
-    phone: '+27 (0) 31 XXX XXXX',
+    email: 'info@lifechangingjourney.co.za',
+    phone: '+27 31 035 0208',
     address: 'Durban, KwaZulu-Natal, South Africa',
-    website: 'https://lifechangingjourneyapp.com',
+    website: 'https://www.lifechangingjourney.co.za',
   },
+
+  /** Canonical production site URL (membership, legal, marketing). */
+  SITE_URL: 'https://www.lifechangingjourney.co.za',
 
   /**
    * Base URL for the membership web app (opens `/plans` from the app).
-   * - Set EXPO_PUBLIC_LCJ_WEB_URL to override (e.g. production or LAN IP for a device).
-   * - In development, defaults to http://localhost:3000 so local `membership-web` works.
+   * Defaults to https://www.lifechangingjourney.co.za in all builds.
+   * Set EXPO_PUBLIC_LCJ_WEB_URL only to point at local membership-web during dev.
    */
   PUBLIC_SITE_URL: (() => {
+    const productionUrl = 'https://www.lifechangingjourney.co.za'
     const fromEnv =
       typeof process.env.EXPO_PUBLIC_LCJ_WEB_URL === 'string' && process.env.EXPO_PUBLIC_LCJ_WEB_URL
         ? process.env.EXPO_PUBLIC_LCJ_WEB_URL.replace(/\/$/, '')
         : ''
-    if (fromEnv) return fromEnv
-    if (typeof __DEV__ !== 'undefined' && __DEV__) return 'http://localhost:3000'
-    return 'https://www.lifechangingjourney.co.za'
+    return fromEnv || productionUrl
   })(),
   
   // Social Media Links
   SOCIAL_MEDIA: {
     facebook: 'https://www.facebook.com/share/1B7sqUfweq/',
     instagram: 'https://www.instagram.com/lifechanging_journey?igsh=ZjF5ZjBoZWU1NXQx',
-    linkedin: 'https://linkedin.com/company/lifechangingjourneyapp',
+    linkedin: 'https://linkedin.com/company/lifechangingjourney',
     youtube: 'https://www.youtube.com/@lifechangingjourney-h4j',
   },
   
@@ -80,6 +82,9 @@ export const Constants = {
     REMINDER: 'reminder',
     GENERAL: 'general',
     PROMOTION: 'promotion',
+    EVENT: 'event',
+    DAILY_WORD: 'daily_word',
+    LIVE: 'live',
   },
   
   // Time Slots for Bookings
@@ -129,6 +134,7 @@ export const Constants = {
     USER_TOKEN: 'user_token',
     USER_PREFERENCES: 'user_preferences',
     ONBOARDING_COMPLETED: 'onboarding_completed',
+    TERMS_ACCEPTED: 'lcj_terms_accepted_v1',
     LANGUAGE_PREFERENCE: 'language_preference',
   },
   
