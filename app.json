@@ -12,7 +12,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.lifechangingjourney.app",
-      "buildNumber": "1",
+      "buildNumber": "2",
       "deploymentTarget": "13.4",
       "requireFullScreen": false,
       "icon": "./assets/icon.png",
@@ -36,9 +36,6 @@
           "whatsapp",
           "https",
           "http"
-        ],
-        "UIBackgroundModes": [
-          "remote-notification"
         ],
         "UIViewControllerBasedStatusBarAppearance": true,
         "UIStatusBarStyle": "UIStatusBarStyleDefault",
@@ -104,15 +101,7 @@
           }
         }
       ],
-      [
-        "expo-notifications",
-        {
-          "icon": "./assets/icon.png",
-          "color": "#012630",
-          "defaultChannel": "default",
-          "sounds": []
-        }
-      ]
+      "./plugins/withoutPushEntitlement.js"
     ],
     "experiments": {
       "reactCompiler": true

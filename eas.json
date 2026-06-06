@@ -18,9 +18,11 @@
       }
     },
     "production": {
+      "autoIncrement": true,
       "env": {
         "EXPO_PUBLIC_ENV": "production",
-        "EXPO_PUBLIC_LCJ_WEB_URL": "https://www.lifechangingjourney.co.za"
+        "EXPO_PUBLIC_LCJ_WEB_URL": "https://www.lifechangingjourney.co.za",
+        "EXPO_PUBLIC_ENABLE_AUTH": "true"
       },
       "android": {
         "buildType": "app-bundle"
@@ -42,7 +44,8 @@
     "production": {
       "ios": {
         "appleId": "lifechangingjourney84@gmail.com",
-        "appleTeamId": "4B3H2MM88X"
+        "appleTeamId": "4B3H2MM88X",
+        "ascAppId": "6755474250"
       },
       "android": {
         "serviceAccountKeyPath": "./google-play-service-account.json",
