@@ -1,17 +1,22 @@
 // Main App Component - Life Changing Journey
 import NetInfo from '@react-native-community/netinfo'
 import React from 'react'
-import { LogBox, Platform, StatusBar } from 'react-native'
+import { ActivityIndicator, LogBox, Platform, StatusBar, View } from 'react-native'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import CustomSplashScreen from './src/components/common/CustomSplashScreen'
 import NetworkStatusBar from './src/components/common/NetworkStatusBar'
 import ErrorBoundary from './src/components/ErrorBoundary'
 import { AuthProvider } from './src/context/AuthContext'
-import { SubscriptionProvider } from './src/context/SubscriptionContext'
 import AppNavigator from './src/navigation/AppNavigator'
+import TermsAcceptanceScreen from './src/screens/legal/TermsAcceptanceScreen'
 import { DataProvider } from './src/providers/DataProvider'
 import { FontLoader } from './src/providers/FontLoader'
+import { configureNotificationHandler } from './src/services/pushNotificationService'
+import { hasAcceptedTerms } from './src/services/termsService'
 import { NetworkProvider } from './src/utils/networkUtils'
+import { Colors } from './src/styles/colors'
+
+configureNotificationHandler()
 
 // On web, NetInfo does HEAD requests to the current origin (localhost:8081). Metro often returns
 // 500 for HEAD, causing ERR_ABORTED 500. Disable the reachability check on web to stop those requests.
@@ -28,9 +33,32 @@ LogBox.ignoreLogs([
   'Blocked aria-hidden',
 ]);
 
+function AppContent({ termsAccepted, onTermsAccepted }) {
+  if (termsAccepted === null) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: Colors.background }}>
+        <ActivityIndicator size="large" color={Colors.primary} />
+      </View>
+    )
+  }
+
+  if (!termsAccepted) {
+    return <TermsAcceptanceScreen onAccepted={onTermsAccepted} />
+  }
+
+  return (
+    <>
+      <NetworkStatusBar />
+      <AppNavigator />
+      <StatusBar style="auto" />
+    </>
+  )
+}
+
 export default function App() {
   const [showSplash, setShowSplash] = React.useState(true)
   const [fontsReady, setFontsReady] = React.useState(false)
+  const [termsAccepted, setTermsAccepted] = React.useState(null)
 
   // Override global styles for web to fix scrolling
   if (Platform.OS === 'web') {
@@ -71,6 +99,21 @@ export default function App() {
     return () => clearTimeout(fallbackTimeout)
   }, [])
 
+  React.useEffect(() => {
+    let mounted = true
+    hasAcceptedTerms()
+      .then((accepted) => {
+        if (!mounted) return
+        setTermsAccepted(accepted)
+      })
+      .catch(() => {
+        if (mounted) setTermsAccepted(false)
+      })
+    return () => {
+      mounted = false
+    }
+  }, [])
+
   return (
     <ErrorBoundary>
       <SafeAreaProvider>
@@ -85,13 +128,14 @@ export default function App() {
           
           <FontLoader onReady={() => setFontsReady(true)}>
             <AuthProvider>
-              <SubscriptionProvider>
-                <DataProvider>
-                  <NetworkStatusBar />
-                  <AppNavigator />
-                  <StatusBar style="auto" />
-                </DataProvider>
-              </SubscriptionProvider>
+              <DataProvider>
+                {!showSplash && (
+                  <AppContent
+                    termsAccepted={termsAccepted}
+                    onTermsAccepted={() => setTermsAccepted(true)}
+                  />
+                )}
+              </DataProvider>
             </AuthProvider>
           </FontLoader>
         </NetworkProvider>

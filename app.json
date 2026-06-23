@@ -12,7 +12,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.lifechangingjourney.app",
-      "buildNumber": "1",
+      "buildNumber": "2",
       "deploymentTarget": "13.4",
       "requireFullScreen": false,
       "icon": "./assets/icon.png",
@@ -37,7 +37,6 @@
           "https",
           "http"
         ],
-        "UIBackgroundModes": [],
         "UIViewControllerBasedStatusBarAppearance": true,
         "UIStatusBarStyle": "UIStatusBarStyleDefault",
         "CFBundleDisplayName": "Life Changing Journey",
@@ -46,9 +45,19 @@
       "config": {
         "usesNonExemptEncryption": false
       },
-      "associatedDomains": []
+      "associatedDomains": [
+        "applinks:www.lifechangingjourney.co.za"
+      ]
     },
     "android": {
+      "package": "com.lifechangingjourney.app",
+      "versionCode": 1,
+      "permissions": [
+        "INTERNET",
+        "ACCESS_NETWORK_STATE",
+        "POST_NOTIFICATIONS",
+        "VIBRATE"
+      ],
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -56,7 +65,24 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "www.lifechangingjourney.co.za",
+              "pathPrefix": "/"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ]
     },
     "web": {
       "output": "static",
@@ -75,17 +101,15 @@
           }
         }
       ],
-      [
-        "expo-notifications",
-        {
-          "icon": "./assets/icon.png"
-        }
-      ]
+      "./plugins/withoutPushEntitlement.js"
     ],
     "experiments": {
       "reactCompiler": true
     },
     "extra": {
+      "privacyPolicyUrl": "https://www.lifechangingjourney.co.za/legal/terms-and-policies",
+      "termsUrl": "https://www.lifechangingjourney.co.za/legal/terms-and-policies",
+      "websiteUrl": "https://www.lifechangingjourney.co.za",
       "eas": {
         "projectId": "bc265066-d7a0-43c1-ae2c-d7d7a013bff8"
       }

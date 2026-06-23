@@ -44,7 +44,7 @@ export const staticData = {
       isActive: true,
       practitioner: 'Life Changing Journey',
       practitionerTitle: 'Traditional Spiritual Practitioner',
-      website: 'https://lifechangingjourney.co.za',
+      website: 'https://www.lifechangingjourney.co.za',
       phone: '+27310350208'
     },
     {
@@ -88,7 +88,7 @@ export const staticData = {
       isActive: true,
       practitioner: 'Life Changing Journey',
       practitionerTitle: 'Clinical Hypnotherapist & Life Coach',
-      website: 'https://lifechangingjourney.co.za',
+      website: 'https://www.lifechangingjourney.co.za',
       phone: '+27310350208'
     },
     {

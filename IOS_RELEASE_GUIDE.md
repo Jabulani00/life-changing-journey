@@ -2,6 +2,8 @@
 
 This guide will help you prepare and submit your app to the Apple App Store.
 
+**Current production builds, artifacts, and submit status:** see [docs/RELEASE_HISTORY.md](docs/RELEASE_HISTORY.md) (June 2026 iOS build **11**, TestFlight copy, Apple agreement blocker).
+
 ## Prerequisites
 
 1. **Apple Developer Account**: You need an active Apple Developer Program membership ($99/year)

@@ -7,12 +7,14 @@ import {
   createUserWithEmailAndPassword,
   getAuth as getFirebaseAuth,
   onAuthStateChanged,
+  sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
 } from 'firebase/auth'
 import {
   addDoc,
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
@@ -68,6 +70,7 @@ export const COLLECTIONS = {
   USER_MEMBERSHIPS: 'user_memberships',
   /** Staff follow-ups / call reminders keyed by auto id */
   STAFF_TASKS: 'staff_tasks',
+  PUSH_TOKENS: 'push_tokens',
 }
 
 export async function createBooking(data) {
@@ -432,6 +435,33 @@ export async function addMotivation(data) {
   return { id: ref.id, ...data }
 }
 
+/** Save or update an Expo push token for broadcast notifications. */
+export async function savePushToken(docId, data) {
+  const ref = doc(getDb(), COLLECTIONS.PUSH_TOKENS, docId)
+  await setDoc(
+    ref,
+    {
+      expoPushToken: data.expoPushToken,
+      userId: data.userId || 'guest',
+      platform: data.platform || null,
+      updatedAt: serverTimestamp(),
+    },
+    { merge: true }
+  )
+  return { id: docId }
+}
+
+/** All registered push tokens (used when admin posts events, daily word, or live links). */
+export async function getAllPushTokens() {
+  const snap = await getDocs(collection(getDb(), COLLECTIONS.PUSH_TOKENS))
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() }))
+}
+
+export async function removePushToken(docId) {
+  const ref = doc(getDb(), COLLECTIONS.PUSH_TOKENS, docId)
+  await deleteDoc(ref)
+}
+
 // —— Firebase Auth + Firestore users (same insert pattern as bookings/events) ——
 
 /**
@@ -481,6 +511,12 @@ export async function signInWithEmail(email, password) {
 export async function signOutFirebase() {
   const auth = getAuth()
   await firebaseSignOut(auth)
+}
+
+/** Send Firebase Auth password reset email. */
+export async function resetPasswordWithEmail(email) {
+  const auth = getAuth()
+  await sendPasswordResetEmail(auth, (email || '').trim().toLowerCase())
 }
 
 /**

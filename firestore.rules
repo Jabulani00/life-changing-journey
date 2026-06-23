@@ -34,13 +34,15 @@ service cloud.firestore {
       allow read: if request.auth != null && request.auth.uid == userId;
       allow write: if false;
     }
-    // Staff tasks from app (call reminders, follow-ups). Tighten for production.
-    match /staff_tasks/{taskId} {
-      allow create: if request.auth != null;
+    // Daily motivations (Daily Word feed)
+    match /motivations/{motivationId} {
       allow read: if true;
-      // Admin marks tasks done from AdminBookings (tighten with admin claims in production)
-      allow update: if true;
-      allow delete: if false;
+      allow create, update, delete: if true;
+    }
+    // Expo push tokens — devices register on app open; admin reads to broadcast notifications
+    match /push_tokens/{tokenId} {
+      allow read: if true;
+      allow create, update, delete: if true;
     }
   }
 }

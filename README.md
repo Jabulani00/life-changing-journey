@@ -1,51 +1,88 @@
-# Welcome to your Expo app 👋
+# Life Changing Journey
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Expo mobile app for **Life Changing Journey** — holistic wellness services, bookings, membership, daily motivations, events, live streams, and an AI assistant.
+
+**Website:** [https://www.lifechangingjourney.co.za](https://www.lifechangingjourney.co.za)
+
+## Stack
+
+- **Expo SDK 54** / React Native
+- **React Navigation** (`src/navigation/`) — not expo-router
+- **Firebase** Auth + Firestore
+- **EAS Build** for iOS, Google Play, and Huawei App Gallery
 
 ## Get started
 
-1. Install dependencies
-
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
 ```bash
-npm run reset-project
+npm install
+npx expo start
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+For a clean Metro cache:
 
-## Learn more
+```bash
+npx expo start -c
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+Open on a physical device or emulator. Push notifications require a **physical device** and a native dev or EAS build.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## Documentation
 
-## Join the community
+| Document | Description |
+|----------|-------------|
+| [docs/RELEASE_HISTORY.md](docs/RELEASE_HISTORY.md) | **Store builds** — iOS, Play Store, Huawei APKs, submit status, TestFlight copy |
+| [docs/IMPLEMENTATION_SUMMARY.md](docs/IMPLEMENTATION_SUMMARY.md) | **Master reference** — terms gate, URLs, store config, auth, push notifications |
+| [docs/MEMBERSHIP_EXPO_APP.md](docs/MEMBERSHIP_EXPO_APP.md) | Membership tiers, Firestore sync, web checkout |
+| [FIREBASE_SETUP.md](FIREBASE_SETUP.md) | Firebase project and Firestore setup |
+| [ADMIN_SETUP.md](ADMIN_SETUP.md) | Admin accounts and Admin screen |
+| [IOS_RELEASE_GUIDE.md](IOS_RELEASE_GUIDE.md) | iOS App Store release |
+| [IOS_PRE_RELEASE_CHECKLIST.md](IOS_PRE_RELEASE_CHECKLIST.md) | Pre-submission checklist |
+| [REQUIREMENTS_MAPPING.md](REQUIREMENTS_MAPPING.md) | User stories vs implementation status |
+| [membership-web/MEMBERSHIP_WEB_STATUS.md](membership-web/MEMBERSHIP_WEB_STATUS.md) | Next.js membership portal |
 
-Join our community of developers creating universal apps.
+## Production builds
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
-"# life-changing-journey" 
+```bash
+# iOS / Google Play
+eas build --platform all --profile production
+
+# Huawei App Gallery (APK)
+eas build --platform android --profile production-huawei
+```
+
+Deploy Firestore rules before go-live:
+
+```bash
+firebase deploy --only firestore:rules
+```
+
+## Key features
+
+- First-install **terms & policies** acceptance
+- **Membership** status synced from Firestore / membership web
+- **Push notifications** when admin posts Daily Word, events, or live links
+- **Admin** panel for events, bookings, motivations, and live stream URLs
+
+## Project structure
+
+```
+src/
+  navigation/     App, auth, main, and tab navigators
+  screens/        UI screens (main, auth, admin, legal, services)
+  services/       Firebase, push notifications, membership, admin
+  context/        AuthProvider
+  hooks/          usePushNotifications
+  data/           Terms, membership packages
+docs/             Implementation and membership docs
+membership-web/   Next.js membership purchase portal
+```
+
+## Environment
+
+Copy `.env.example` if present, or set:
+
+- `EXPO_PUBLIC_FIREBASE_*` — Firebase config
+- `EXPO_PUBLIC_LCJ_WEB_URL` — optional; defaults to production site
+- `EXPO_PUBLIC_GEMINI_API_KEY` — optional; AI chatbot
+
+Production EAS profile sets `EXPO_PUBLIC_ENV=production` and `EXPO_PUBLIC_LCJ_WEB_URL=https://www.lifechangingjourney.co.za` automatically (see `eas.json`).

@@ -4,13 +4,16 @@ import React from 'react'
 import { ActivityIndicator, View } from 'react-native'
 import ChatbotFAB from '../components/common/ChatbotFAB'
 import { useAuth } from '../context/AuthContext'
+import { usePushNotifications } from '../hooks/usePushNotifications'
 import { Colors } from '../styles/colors'
 import { GlobalStyles } from '../styles/globalStyles'
 import AuthNavigator from './AuthNavigator'
 import MainNavigator from './MainNavigator'
+import { navigationRef } from './navigationRef'
 
 const AppNavigator = () => {
   const { user, loading, admin, adminLoading } = useAuth()
+  usePushNotifications(true)
 
   const resolvingRole = user && adminLoading
 
@@ -23,7 +26,7 @@ const AppNavigator = () => {
   }
 
   return (
-    <NavigationContainer>
+    <NavigationContainer ref={navigationRef}>
       {user ? (
         <>
           <MainNavigator />

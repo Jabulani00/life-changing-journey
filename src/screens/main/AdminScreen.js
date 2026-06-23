@@ -29,6 +29,11 @@ import {
   adminSetLiveStreamConfig,
   adminUpdateBooking,
 } from '../../services/adminService'
+import {
+  notifyLiveStreamUpdated,
+  notifyNewDailyWord,
+  notifyNewEvent,
+} from '../../services/pushNotificationService'
 import { Colors } from '../../styles/colors'
 import { Typography } from '../../styles/typography'
 
@@ -108,11 +113,24 @@ const AdminScreen = ({ navigation, route }) => {
   const handleSaveLiveStream = async () => {
     setLiveSaving(true)
     try {
-      await adminSetLiveStreamConfig({
-        youtubeUrl: liveYoutubeUrl.trim() || null,
-        facebookUrl: liveFacebookUrl.trim() || null,
-      })
-      Alert.alert('Saved', 'Live stream links updated.')
+      const youtubeUrl = liveYoutubeUrl.trim() || null
+      const facebookUrl = liveFacebookUrl.trim() || null
+      await adminSetLiveStreamConfig({ youtubeUrl, facebookUrl })
+      if (youtubeUrl || facebookUrl) {
+        try {
+          const result = await notifyLiveStreamUpdated({ youtubeUrl, facebookUrl })
+          Alert.alert(
+            'Saved',
+            result?.sent
+              ? `Live stream links updated. Push sent to ${result.sent} device(s).`
+              : 'Live stream links updated. No devices registered for push yet.'
+          )
+        } catch (pushErr) {
+          Alert.alert('Saved', `Live links saved. Push notification failed: ${pushErr?.message || 'unknown error'}`)
+        }
+      } else {
+        Alert.alert('Saved', 'Live stream links updated.')
+      }
     } catch (e) {
       Alert.alert('Error', e?.message || 'Failed to save.')
     } finally {
@@ -136,7 +154,17 @@ const AdminScreen = ({ navigation, route }) => {
       setMotMessage('')
       setMotAuthor('')
       setMotCategory('general')
-      Alert.alert('Done', 'Motivation posted.')
+      try {
+        const result = await notifyNewDailyWord({ message: msg, category: motCategory })
+        Alert.alert(
+          'Done',
+          result?.sent
+            ? `Daily word posted. Push sent to ${result.sent} device(s).`
+            : 'Daily word posted. No devices registered for push yet.'
+        )
+      } catch (pushErr) {
+        Alert.alert('Done', `Daily word posted. Push failed: ${pushErr?.message || 'unknown error'}`)
+      }
       load()
     } catch (e) {
       Alert.alert('Error', e?.message || 'Failed to post motivation.')
@@ -163,7 +191,17 @@ const AdminScreen = ({ navigation, route }) => {
       setDescription('')
       setEventDate('')
       setLocation('')
-      Alert.alert('Done', 'Event posted.')
+      try {
+        const result = await notifyNewEvent({ title: t, description: description.trim() })
+        Alert.alert(
+          'Done',
+          result?.sent
+            ? `Event posted. Push sent to ${result.sent} device(s).`
+            : 'Event posted. No devices registered for push yet.'
+        )
+      } catch (pushErr) {
+        Alert.alert('Done', `Event posted. Push failed: ${pushErr?.message || 'unknown error'}`)
+      }
       load()
     } catch (e) {
       const msg = e?.message || 'Failed to post event.'
