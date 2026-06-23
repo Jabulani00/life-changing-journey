@@ -30,6 +30,67 @@ Tracks every App Store build and submission with dates, build numbers, outcomes,
 
 ---
 
+### Build 29 — SUBMITTED (June 23, 2026)
+
+| Field | Value |
+|-------|-------|
+| Version | 1.0.0 |
+| Build Number | 29 |
+| EAS Build ID | `32492fb4-eab8-4c5a-94c5-74a0f5f744c0` |
+| EAS Submission ID | `1e66efcf-70bd-4940-b5cb-efa5a9ecc1e9` |
+| Commit | `83e96cc` |
+| Build Date | June 23, 2026 |
+| Status | 🔄 Submitted — In Review |
+| Apple Team ID | 4B3H2MM88X |
+| Apple ID | lifechangingjourney84@gmail.com |
+| ASC App ID | 6755474250 |
+
+**Build Log:** https://expo.dev/accounts/jabumb/projects/life-changing-journey/builds/32492fb4-eab8-4c5a-94c5-74a0f5f744c0
+**IPA Artifact:** https://expo.dev/artifacts/eas/bAsPAPiFt4JdhOWk2kpoQQx0fZsuofHSKk8geab9sE8.ipa
+**Submission:** https://expo.dev/accounts/jabumb/projects/life-changing-journey/submissions/1e66efcf-70bd-4940-b5cb-efa5a9ecc1e9
+
+**Root Causes Fixed (from Build 28 failures):**
+
+Three separate `npm ci` failures on EAS build servers required iterative fixes:
+
+1. **Metro bundle failure (Build 13)** — `react-native-webview` was only a transitive peer dep; added it explicitly as `"react-native-webview": "13.15.0"` in `package.json`.
+2. **Push notification prompt blocking non-interactive build** — Added `"promptToConfigurePushNotifications": false` to `eas.json` cli section; also added `eas-prompt-patch.cjs` to auto-answer all EAS prompts.
+3. **npm ci peer dep conflict (Builds 25, 28)** — `@firebase/auth` has an optional peer dep on `@react-native-async-storage/async-storage@^1.18.1` but we install v2.x. npm v7 on EAS servers validates this strictly. Fix: created `.npmrc` with `legacy-peer-deps=true` (npm v6 peer dep behaviour — no strict peer dep auto-install). Regenerated `package-lock.json` with the same flag.
+
+**Commits in this build:**
+```
+83e96cc  fix: add legacy-peer-deps to resolve npm ci peer dep conflict on EAS
+253adce  fix: regenerate package-lock.json to resolve npm ci sync error on EAS
+7067f0f  fix: disable push notification setup prompt + add react-native-webview
+a151023  fix: add react-native-webview dependency to resolve Metro bundle error
+fdeed90  fix: resolve merge conflicts and add Apple 4.2.2 interactive features
+```
+
+**Commands used:**
+
+```powershell
+# Trigger build (non-interactive via patch scripts)
+node --require ./scripts/eas-trace.cjs --require ./scripts/eas-prompt-patch.cjs `
+  "C:\Users\JABU\AppData\Roaming\npm\node_modules\eas-cli\bin\run" `
+  build --platform ios --profile production `
+  2>&1 | Tee-Object -FilePath "C:\Users\JABU\Desktop\eas-build-debug2.txt"
+
+# Submit latest build to App Store
+node --require ./scripts/eas-prompt-patch.cjs `
+  "C:\Users\JABU\AppData\Roaming\npm\node_modules\eas-cli\bin\run" `
+  submit --platform ios --latest
+```
+
+**Files added/changed for build infrastructure:**
+- `.npmrc` — `legacy-peer-deps=true` (fixes npm ci peer dep validation on EAS)
+- `package-lock.json` — regenerated clean with legacy-peer-deps
+- `package.json` — added `react-native-webview@13.15.0` explicitly
+- `eas.json` — added `promptToConfigurePushNotifications: false` in cli section
+- `scripts/eas-prompt-patch.cjs` — patches EAS CLI prompts for non-interactive use
+- `scripts/eas-trace.cjs` — diagnostic trace for debugging EAS exit points
+
+---
+
 ### Build 12 — SUBMITTED (June 23, 2026)
 
 | Field | Value |
@@ -192,4 +253,4 @@ eas build:list --platform ios --limit 5
 
 ---
 
-*Last updated: June 23, 2026*
+*Last updated: June 23, 2026 — Build 29 submitted (fixes: legacy-peer-deps, react-native-webview, push notif prompt)*
