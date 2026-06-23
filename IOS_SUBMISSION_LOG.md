@@ -1,0 +1,195 @@
+# iOS Submission Log — Life Changing Journey
+
+Tracks every App Store build and submission with dates, build numbers, outcomes, and commands used.
+
+---
+
+## Submission History
+
+### Build 11 — REJECTED (June 2026)
+
+| Field | Value |
+|-------|-------|
+| Version | 1.0.0 |
+| Build Number | 11 |
+| Submission ID | a7149b74-36bb-45e8-a648-2e23c7a3b98b |
+| Review Date | June 22, 2026 |
+| Status | ❌ Rejected |
+| Rejection Guideline | 4.2.2 — Minimum Functionality |
+
+**Apple Feedback:**
+> The app's main functionality is to market your service, with limited or no user-facing interactive features. Apps that are primarily marketing materials or advertisements are not appropriate for the App Store.
+
+**Root Cause:**
+- Home screen showed static service cards with external links only
+- No in-app interactive actions visible to the reviewer
+- Booking flow required Calendly URL env var (showed error to reviewer)
+- Merge conflicts in code (`HomeScreen.js`, `MyBookingsScreen.js`, `firebase.real.js`)
+
+**EAS Build ID:** `28c97a0a-4198-4577-843c-d270b4076ab6`
+
+---
+
+### Build 12 — SUBMITTED (June 23, 2026)
+
+| Field | Value |
+|-------|-------|
+| Version | 1.0.0 |
+| Build Number | 12 |
+| Commit | `fdeed90` |
+| Status | 🔄 In Review |
+| EAS Account | jabumb / mjgwala2k@gmail.com |
+| Apple Team ID | 4B3H2MM88X |
+| Apple ID | lifechangingjourney84@gmail.com |
+
+**Changes Made (addressing 4.2.2 rejection):**
+
+1. **Merge conflicts resolved** — `HomeScreen.js`, `MyBookingsScreen.js`, `firebase.real.js`
+2. **Daily Wellness Check-in** — Interactive mood tracker on Home (Great/Good/Okay/Low/Stressed), persisted per-day via AsyncStorage
+3. **Book Appointment CTA** — Prominent gradient banner on Home screen, always visible, navigates to booking flow
+4. **In-App Booking Form** (replaces Calendly-not-configured error):
+   - Service selector (pulls from `staticData.services`)
+   - 14-day horizontal date picker
+   - Time slot grid (08:00–17:00)
+   - Optional notes field
+   - Saves to Firestore via `createBooking()` — same data model as Calendly bookings
+   - Triggers notifications and staff tasks same as Calendly flow
+   - Navigates to `BookingSuccessScreen` on completion
+5. **RSVP buttons on Events** — Toggle RSVP per event, persisted via AsyncStorage, confirmation alerts
+6. **Save & Share on Motivations** — Heart/Save toggle and native Share sheet on each card; "Saved" filter tab
+7. **UI polish** — All booking screens use `useSafeAreaInsets()`, 44pt touch targets, consistent gradients
+
+**Commands Run:**
+
+```bash
+# 1. Upgrade EAS CLI
+npm install -g eas-cli
+# Result: eas-cli/20.3.0
+
+# 2. Verify login
+eas whoami
+# Result: jabumb / mjgwala2k@gmail.com
+
+# 3. Stage resolved conflict files + new changes
+git add src/screens/main/HomeScreen.js \
+        src/screens/main/MyBookingsScreen.js \
+        src/services/firebase.real.js \
+        src/screens/BookingScreen.jsx \
+        src/screens/main/EventsScreen.js \
+        src/screens/main/MotivationsScreen.js
+
+# 4. Commit
+git commit -m "fix: resolve merge conflicts and add Apple 4.2.2 interactive features"
+# Commit: fdeed90
+
+# 5. Trigger EAS production build (build number auto-incremented to 12 by remote version source)
+eas build --platform ios --profile production --non-interactive
+
+# 6. Submit to App Store (run after build finishes)
+eas submit --platform ios --latest
+```
+
+**EAS Config used (`eas.json`):**
+```json
+{
+  "cli": { "version": ">= 5.9.0", "appVersionSource": "remote" },
+  "build": {
+    "production": { "env": { "EXPO_PUBLIC_ENV": "production" } }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "appleId": "lifechangingjourney84@gmail.com",
+        "appleTeamId": "4B3H2MM88X"
+      }
+    }
+  }
+}
+```
+
+**App Store Connect Review Notes used for resubmission:**
+```
+APP REVIEW NOTES — Resubmission addressing Guideline 4.2.2
+
+We have added the following user-facing interactive features:
+
+1. DAILY WELLNESS CHECK-IN (Home screen)
+   Tap any of the 5 mood options (Great/Good/Okay/Low/Stressed).
+   Your selection is saved and a link to the AI Wellness Coach appears.
+
+2. IN-APP BOOKING (Book tab / "Book Appointment" banner on Home)
+   - Select a service from the list
+   - Choose a date from the next 14 days
+   - Pick a time slot (08:00–17:00)
+   - Add optional notes
+   - Tap "Confirm Booking" — saves to our database instantly
+   - View confirmation in My Bookings tab
+
+3. EVENT RSVP (Events screen)
+   Each event card has an "RSVP for this Event" button.
+   Tap to register; tap again to cancel. Shows "RSVP Confirmed" state.
+
+4. MOTIVATIONS — SAVE & SHARE
+   Each motivation card has Save (heart) and Share buttons.
+   Saved items appear in the "Saved" filter tab.
+
+DEMO ACCOUNT:
+Email: [your demo account email]
+Password: [your demo account password]
+
+The app is a wellness client portal — not purely informational.
+Users can book sessions, track mood, RSVP to events, and save content.
+```
+
+---
+
+## App Configuration Reference
+
+| Setting | Value |
+|---------|-------|
+| Bundle ID | `com.lifechangingjourney.app` |
+| Version | `1.0.0` |
+| Min iOS | `13.4` |
+| Supports iPad | Yes |
+| Encryption | `usesNonExemptEncryption: false` |
+| EAS Project ID | `bc265066-d7a0-43c1-ae2c-d7d7a013bff8` |
+
+---
+
+## How to Resubmit in Future
+
+```bash
+# 1. Make code changes, then commit
+git add <files>
+git commit -m "your message"
+
+# 2. Build (build number auto-increments)
+eas build --platform ios --profile production --non-interactive
+
+# 3. Wait for build to finish, then submit
+eas submit --platform ios --latest
+
+# Check build list / status
+eas build:list --platform ios --limit 5
+```
+
+**Notes:**
+- `appVersionSource: "remote"` in `eas.json` means EAS auto-increments build numbers — never edit `buildNumber` in `app.json` manually
+- Build takes ~20–30 min on Expo servers; check progress at https://expo.dev
+- After `eas submit`, log into App Store Connect and click "Submit for Review"
+- Always increment the `version` in `app.json` for a new App Store version (e.g. `1.0.0` → `1.1.0`)
+
+---
+
+## Common Rejection Reasons & Fixes
+
+| Guideline | Issue | Fix |
+|-----------|-------|-----|
+| 4.2.2 | Minimum functionality | Add interactive features (booking, check-in, RSVP) — DONE in Build 12 |
+| 2.3.8 | Placeholder icons | Ensure `assets/icon.png` is final branded 1024×1024 PNG |
+| 5.1.1 | Privacy policy missing | Add URL to App Store Connect listing |
+| 2.1 | App crashes | Test on device before submitting |
+
+---
+
+*Last updated: June 23, 2026*
