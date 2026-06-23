@@ -25,7 +25,7 @@ export const ENTITLEMENT_LABELS = {
 }
 
 /**
- * Same rules as web GET /api/me/entitlements, plus optional expiry if endAt is in the past.
+ * Same rules as web GET /api/me/entitlements.
  * @param {string | undefined} planId
  * @returns {typeof EMPTY}
  */
@@ -45,6 +45,7 @@ export function mapPlanToEntitlements(planId) {
     }
   }
 
+  // platinum
   return {
     ...EMPTY,
     priorityBooking: true,
@@ -58,7 +59,7 @@ export function mapPlanToEntitlements(planId) {
 
 /**
  * @param {{ status?: string, endAt?: string, planId?: string } | null | undefined} membership
- * @returns {string | null} plan id if membership unlocks app features
+ * @returns {string | null} planId if membership is currently active
  */
 export function getEffectivePlanId(membership) {
   if (!membership || membership.status !== 'active') return null
@@ -78,7 +79,7 @@ export async function getMembership(userId) {
 }
 
 /**
- * Real-time membership doc (same as web dashboard source).
+ * Real-time membership listener (same Firestore doc as web dashboard).
  * @returns {import('firebase/firestore').Unsubscribe}
  */
 export function subscribeMembership(userId, onData, onError) {
@@ -93,6 +94,6 @@ export function subscribeMembership(userId, onData, onError) {
       if (!snap.exists()) onData(null)
       else onData(snap.data())
     },
-    onError
+    onError ?? (() => {})
   )
 }

@@ -71,12 +71,41 @@ export const COLLECTIONS = {
 }
 
 export async function createBooking(data) {
+  const userId = data.userId
+  let membershipTier = null
+  let memberType = 'standard'
+  let isPriority = false
+
+  if (userId) {
+    try {
+      const memRef = doc(getDb(), COLLECTIONS.USER_MEMBERSHIPS, userId)
+      const memSnap = await getDoc(memRef)
+      if (memSnap.exists()) {
+        const mem = memSnap.data()
+        const isActive = mem.status === 'active' && (!mem.endAt || new Date(mem.endAt) > new Date())
+        if (isActive && mem.planId) {
+          membershipTier = mem.planId
+          memberType = mem.memberType || mem.planId
+          isPriority = mem.planId === 'gold' || mem.planId === 'platinum'
+        }
+      }
+    } catch (_) {}
+  }
+
   const ref = await addDoc(collection(getDb(), COLLECTIONS.BOOKINGS), {
     ...data,
     status: data.status || 'pending',
+    membershipTier,
+    memberType,
+    isPriority,
     createdAt: serverTimestamp(),
   })
-  return { id: ref.id, ...data }
+  return { id: ref.id, ...data, membershipTier, memberType, isPriority }
+}
+
+const TIER_ORDER = { platinum: 0, gold: 1, silver: 2 }
+function tierRank(tier) {
+  return TIER_ORDER[tier] ?? 99
 }
 
 /**
@@ -180,14 +209,46 @@ export async function getBookings(userId, asAdmin = false) {
       scheduledAt: row.scheduledAt?.toDate?.()?.toISOString?.() ?? row.scheduledAt,
     }
   })
-  list.sort((a, b) => {
-    const pa = typeof a.priority === 'number' ? a.priority : 0
-    const pb = typeof b.priority === 'number' ? b.priority : 0
-    if (pb !== pa) return pb - pa
-    const sa = a.scheduledAt || a.createdAt || ''
-    const sb = b.scheduledAt || b.createdAt || ''
-    return String(sb).localeCompare(String(sa))
-  })
+
+  if (asAdmin) {
+    // Enrich with live membership data for any booking missing it
+    const missingMembershipIds = [...new Set(
+      list.filter((b) => !b.membershipTier && b.userId).map((b) => b.userId)
+    )]
+    if (missingMembershipIds.length > 0) {
+      const memSnaps = await Promise.all(
+        missingMembershipIds.map((uid) => getDoc(doc(getDb(), COLLECTIONS.USER_MEMBERSHIPS, uid)))
+      )
+      const memMap = {}
+      memSnaps.forEach((snap) => {
+        if (snap.exists()) {
+          const data = snap.data()
+          const isActive = data.status === 'active' && (!data.endAt || new Date(data.endAt) > new Date())
+          memMap[snap.id] = isActive ? data.planId : null
+        }
+      })
+      list.forEach((b) => {
+        if (!b.membershipTier && b.userId && memMap[b.userId]) {
+          b.membershipTier = memMap[b.userId]
+          b.isPriority = b.membershipTier === 'gold' || b.membershipTier === 'platinum'
+        }
+      })
+    }
+    // Priority members (gold/platinum) float to top, then sort by date desc
+    list.sort((a, b) => {
+      const tierDiff = tierRank(a.membershipTier) - tierRank(b.membershipTier)
+      if (tierDiff !== 0) return tierDiff
+      return (b.scheduledAt || b.createdAt || '').localeCompare(a.scheduledAt || a.createdAt || '')
+    })
+  } else {
+    list.sort((a, b) => {
+      const pa = typeof a.priority === 'number' ? a.priority : 0
+      const pb = typeof b.priority === 'number' ? b.priority : 0
+      if (pb !== pa) return pb - pa
+      return (b.scheduledAt || b.createdAt || '').localeCompare(a.scheduledAt || a.createdAt || '')
+    })
+  }
+
   return list
 }
 

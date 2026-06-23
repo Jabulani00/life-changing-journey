@@ -1,5 +1,6 @@
 // Premium Home Screen - Life Changing Journey
 import { Ionicons } from '@expo/vector-icons'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { LinearGradient } from 'expo-linear-gradient'
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect, useState } from 'react'
@@ -25,8 +26,14 @@ import { staticData } from '../../utils/staticData'
 
 const { width } = Dimensions.get('window')
 
+const TIER_CHIP = {
+  platinum: { label: 'Platinum Member ★', bg: '#E8E8F0', text: '#4B4B8F' },
+  gold: { label: 'Gold Member ★', bg: '#FEF3C7', text: '#92400E' },
+  silver: { label: 'Silver Member', bg: '#F3F4F6', text: '#374151' },
+}
+
 const HomeScreen = ({ navigation }) => {
-  const { user, getUserProfile, admin } = useAuth()
+  const { user, getUserProfile, admin, effectivePlanId } = useAuth()
   const { profile } = useSubscription()
   const showAdmin = admin || profile?.isAdmin === true
   const insets = useSafeAreaInsets()
@@ -34,10 +41,38 @@ const HomeScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
   const [currentQuote, setCurrentQuote] = useState(staticData.inspirationalQuotes[0])
+  const [todayMood, setTodayMood] = useState(null)
+  const [moodSaved, setMoodSaved] = useState(false)
+
+  const MOOD_KEY = `lcj_mood_${new Date().toISOString().slice(0, 10)}`
+
+  const MOODS = [
+    { key: 'great', label: 'Great', icon: 'sunny', color: '#F59E0B' },
+    { key: 'good', label: 'Good', icon: 'happy', color: '#10B981' },
+    { key: 'okay', label: 'Okay', icon: 'partly-sunny', color: '#3B82F6' },
+    { key: 'low', label: 'Low', icon: 'rainy', color: '#8B5CF6' },
+    { key: 'stressed', label: 'Stressed', icon: 'thunderstorm', color: '#EF4444' },
+  ]
+
+  const loadMood = async () => {
+    try {
+      const saved = await AsyncStorage.getItem(MOOD_KEY)
+      if (saved) { setTodayMood(saved); setMoodSaved(true) }
+    } catch {}
+  }
+
+  const saveMood = async (moodKey) => {
+    setTodayMood(moodKey)
+    try {
+      await AsyncStorage.setItem(MOOD_KEY, moodKey)
+      setMoodSaved(true)
+    } catch {}
+  }
 
   useEffect(() => {
     loadUserProfile()
     rotateQuote()
+    loadMood()
   }, [])
 
   const loadUserProfile = async () => {
@@ -288,6 +323,15 @@ const HomeScreen = ({ navigation }) => {
             }}>
               Welcome to Life Changing Journey
             </Text>
+            {effectivePlanId && TIER_CHIP[effectivePlanId] && (
+              <View style={{ alignItems: 'center', marginBottom: 6 }}>
+                <View style={{ backgroundColor: TIER_CHIP[effectivePlanId].bg, borderRadius: 20, paddingHorizontal: 14, paddingVertical: 4 }}>
+                  <Text style={{ fontSize: 12, fontWeight: '700', color: TIER_CHIP[effectivePlanId].text }}>
+                    {TIER_CHIP[effectivePlanId].label}
+                  </Text>
+                </View>
+              </View>
+            )}
             <Text style={{
               ...Typography.textStyles.bodySmall,
               color: Colors.textSecondary,
@@ -397,6 +441,99 @@ const HomeScreen = ({ navigation }) => {
               >
                 <Ionicons name="construct-outline" size={24} color={Colors.primary} />
                 <Text style={{ ...Typography.textStyles.captionBold, color: Colors.textPrimary, marginTop: 8 }}>Admin</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+
+        {/* Book Appointment CTA */}
+        <View style={{ marginBottom: 20, paddingHorizontal: 16 }}>
+          <TouchableOpacity
+            activeOpacity={0.92}
+            onPress={() => navigation.navigate('Booking')}
+            style={{ borderRadius: 18, overflow: 'hidden' }}
+          >
+            <LinearGradient
+              colors={[Colors.primary, Colors.primaryLight || '#1a5276']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={{ flexDirection: 'row', alignItems: 'center', padding: 18, borderRadius: 18 }}
+            >
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 17, fontWeight: '700', color: '#fff', marginBottom: 3 }}>
+                  Book an Appointment
+                </Text>
+                <Text style={{ fontSize: 13, color: 'rgba(255,255,255,0.85)' }}>
+                  Schedule a session with our practitioners
+                </Text>
+              </View>
+              <View style={{
+                width: 44, height: 44, borderRadius: 22,
+                backgroundColor: 'rgba(255,255,255,0.2)',
+                justifyContent: 'center', alignItems: 'center',
+              }}>
+                <Ionicons name="calendar" size={22} color="#fff" />
+              </View>
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
+
+        {/* Daily Wellness Check-in */}
+        <View style={{ marginBottom: 24, paddingHorizontal: 16 }}>
+          <View style={{
+            backgroundColor: Colors.surface,
+            borderRadius: 20,
+            padding: 18,
+            borderWidth: 1,
+            borderColor: Colors.lightGray,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.06,
+            shadowRadius: 8,
+            elevation: 3,
+          }}>
+            <Text style={{ fontSize: 15, fontWeight: '700', color: Colors.textPrimary, marginBottom: 4 }}>
+              Daily Wellness Check-in
+            </Text>
+            <Text style={{ fontSize: 13, color: Colors.textSecondary, marginBottom: 14 }}>
+              {moodSaved ? 'Your mood for today has been recorded.' : 'How are you feeling today?'}
+            </Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+              {MOODS.map((mood) => {
+                const selected = todayMood === mood.key
+                return (
+                  <TouchableOpacity
+                    key={mood.key}
+                    onPress={() => saveMood(mood.key)}
+                    activeOpacity={0.8}
+                    style={{
+                      alignItems: 'center',
+                      flex: 1,
+                      marginHorizontal: 3,
+                      paddingVertical: 10,
+                      borderRadius: 14,
+                      backgroundColor: selected ? mood.color + '22' : '#F9FAFB',
+                      borderWidth: selected ? 2 : 1,
+                      borderColor: selected ? mood.color : Colors.lightGray,
+                    }}
+                  >
+                    <Ionicons name={mood.icon + '-outline'} size={22} color={selected ? mood.color : Colors.textSecondary} />
+                    <Text style={{ fontSize: 10, marginTop: 4, fontWeight: selected ? '700' : '400', color: selected ? mood.color : Colors.textSecondary }}>
+                      {mood.label}
+                    </Text>
+                  </TouchableOpacity>
+                )
+              })}
+            </View>
+            {moodSaved && (
+              <TouchableOpacity
+                onPress={() => navigation.navigate('Chatbot')}
+                style={{ marginTop: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}
+              >
+                <Ionicons name="chatbubble-ellipses-outline" size={16} color={Colors.primary} />
+                <Text style={{ fontSize: 13, color: Colors.primary, fontWeight: '600', marginLeft: 6 }}>
+                  Talk to our AI Wellness Coach
+                </Text>
               </TouchableOpacity>
             )}
           </View>

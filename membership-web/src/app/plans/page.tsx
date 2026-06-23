@@ -109,7 +109,7 @@ export default function PlansPage() {
       </section>
       <p className="muted" style={{ marginBottom: "1rem", fontSize: "0.85rem" }}>
         {process.env.NEXT_PUBLIC_PAYMENT_HINT ??
-          "Checkout uses Stripe when the server has STRIPE_SECRET_KEY; otherwise the mock provider runs."}
+          "Secure checkout powered by Paystack. One-time payment — no recurring subscription."}
       </p>
 
       <section className="plans-grid">

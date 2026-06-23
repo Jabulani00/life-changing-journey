@@ -1,9 +1,11 @@
 // Events Screen - List events from Firebase (admin posts from Admin screen)
 import { Ionicons } from '@expo/vector-icons'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { LinearGradient } from 'expo-linear-gradient'
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect, useState } from 'react'
 import {
+    Alert,
     RefreshControl,
     ScrollView,
     StyleSheet,
@@ -17,21 +19,44 @@ import { getEvents } from '../../services/firebase'
 import { Colors } from '../../styles/colors'
 import { Typography } from '../../styles/typography'
 
+const RSVP_PREFIX = 'lcj_rsvp_'
+
 const EventsScreen = ({ navigation }) => {
   const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
+  const [rsvpSet, setRsvpSet] = useState({})
 
   const load = async () => {
     try {
       const list = await getEvents()
       setEvents(list)
+      const keys = await AsyncStorage.getAllKeys()
+      const rsvpKeys = keys.filter(k => k.startsWith(RSVP_PREFIX))
+      const pairs = await AsyncStorage.multiGet(rsvpKeys)
+      const map = {}
+      pairs.forEach(([k, v]) => { if (v === 'yes') map[k.replace(RSVP_PREFIX, '')] = true })
+      setRsvpSet(map)
     } catch (e) {
       console.warn('Events load error:', e)
       setEvents([])
     } finally {
       setLoading(false)
       setRefreshing(false)
+    }
+  }
+
+  const handleRsvp = async (eventId) => {
+    const key = RSVP_PREFIX + eventId
+    const isRsvped = !!rsvpSet[eventId]
+    if (isRsvped) {
+      await AsyncStorage.removeItem(key)
+      setRsvpSet(prev => { const n = { ...prev }; delete n[eventId]; return n })
+      Alert.alert('RSVP Cancelled', 'You have removed your RSVP for this event.')
+    } else {
+      await AsyncStorage.setItem(key, 'yes')
+      setRsvpSet(prev => ({ ...prev, [eventId]: true }))
+      Alert.alert('RSVP Confirmed!', 'You are registered for this event. We look forward to seeing you!')
     }
   }
 
@@ -95,33 +120,64 @@ const EventsScreen = ({ navigation }) => {
               </Text>
             </View>
           ) : (
-            events.map((event) => (
-              <View key={event.id} style={styles.card}>
-                <View style={styles.cardHeader}>
-                  <ExpandableText
-                    text={event.title || 'Event'}
-                    truncateLength={60}
-                    style={styles.cardTitle}
-                  />
-                  <Text style={styles.cardDate}>
-                    {formatDate(event.date)}
-                  </Text>
-                </View>
-                {event.description ? (
-                  <ExpandableText
-                    text={event.description}
-                    truncateLength={180}
-                    style={styles.cardDesc}
-                  />
-                ) : null}
-                {event.location ? (
-                  <View style={styles.row}>
-                    <Ionicons name="location-outline" size={16} color={Colors.textSecondary} />
-                    <Text style={styles.location}>{event.location}</Text>
+            events.map((event) => {
+              const isRsvped = !!rsvpSet[event.id]
+              return (
+                <View key={event.id} style={styles.card}>
+                  <View style={styles.cardHeader}>
+                    <ExpandableText
+                      text={event.title || 'Event'}
+                      truncateLength={60}
+                      style={styles.cardTitle}
+                    />
+                    <Text style={styles.cardDate}>
+                      {formatDate(event.date)}
+                    </Text>
                   </View>
-                ) : null}
-              </View>
-            ))
+                  {event.description ? (
+                    <ExpandableText
+                      text={event.description}
+                      truncateLength={180}
+                      style={styles.cardDesc}
+                    />
+                  ) : null}
+                  {event.location ? (
+                    <View style={[styles.row, { marginBottom: 12 }]}>
+                      <Ionicons name="location-outline" size={16} color={Colors.textSecondary} />
+                      <Text style={styles.location}>{event.location}</Text>
+                    </View>
+                  ) : null}
+                  <TouchableOpacity
+                    onPress={() => handleRsvp(event.id)}
+                    activeOpacity={0.85}
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      paddingVertical: 10,
+                      borderRadius: 12,
+                      backgroundColor: isRsvped ? Colors.primary + '18' : Colors.primary,
+                      borderWidth: isRsvped ? 1.5 : 0,
+                      borderColor: Colors.primary,
+                    }}
+                  >
+                    <Ionicons
+                      name={isRsvped ? 'checkmark-circle' : 'calendar-outline'}
+                      size={16}
+                      color={isRsvped ? Colors.primary : '#fff'}
+                    />
+                    <Text style={{
+                      fontSize: 14,
+                      fontWeight: '600',
+                      color: isRsvped ? Colors.primary : '#fff',
+                      marginLeft: 6,
+                    }}>
+                      {isRsvped ? 'RSVP Confirmed' : 'RSVP for this Event'}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              )
+            })
           )}
         </ScrollView>
       )}

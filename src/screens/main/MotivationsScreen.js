@@ -1,11 +1,13 @@
 // Daily Motivations Screen - Feed of admin-posted quotes, messages & scriptures
 import { Ionicons } from '@expo/vector-icons'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { LinearGradient } from 'expo-linear-gradient'
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect, useState } from 'react'
 import {
   RefreshControl,
   ScrollView,
+  Share,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -64,9 +66,17 @@ const formatDate = (dateStr) => {
   return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
-const MotivationCard = ({ item }) => {
+const FAV_KEY = 'lcj_fav_motivations'
+
+const MotivationCard = ({ item, isFav, onToggleFav }) => {
   const color = CATEGORY_COLORS[item.category] || CATEGORY_COLORS.general
   const icon = CATEGORY_ICONS[item.category] || CATEGORY_ICONS.general
+
+  const handleShare = async () => {
+    try {
+      await Share.share({ message: item.message + (item.author ? `\n— ${item.author}` : '') })
+    } catch {}
+  }
 
   return (
     <View style={[styles.card, { borderLeftColor: color }]}>
@@ -89,6 +99,17 @@ const MotivationCard = ({ item }) => {
       {item.author && (
         <Text style={styles.authorText}>— {item.author}</Text>
       )}
+
+      <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 12, gap: 12 }}>
+        <TouchableOpacity onPress={handleShare} activeOpacity={0.8} style={styles.actionBtn}>
+          <Ionicons name="share-social-outline" size={18} color={Colors.primary} />
+          <Text style={styles.actionBtnText}>Share</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => onToggleFav(item.id)} activeOpacity={0.8} style={styles.actionBtn}>
+          <Ionicons name={isFav ? 'heart' : 'heart-outline'} size={18} color={isFav ? '#EF4444' : Colors.primary} />
+          <Text style={[styles.actionBtnText, isFav && { color: '#EF4444' }]}>{isFav ? 'Saved' : 'Save'}</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   )
 }
@@ -98,6 +119,23 @@ const MotivationsScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [activeFilter, setActiveFilter] = useState('all')
+  const [favIds, setFavIds] = useState(new Set())
+
+  const loadFavs = async () => {
+    try {
+      const raw = await AsyncStorage.getItem(FAV_KEY)
+      if (raw) setFavIds(new Set(JSON.parse(raw)))
+    } catch {}
+  }
+
+  const toggleFav = async (id) => {
+    setFavIds(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id); else next.add(id)
+      AsyncStorage.setItem(FAV_KEY, JSON.stringify([...next])).catch(() => {})
+      return next
+    })
+  }
 
   const load = async () => {
     try {
@@ -114,6 +152,7 @@ const MotivationsScreen = ({ navigation }) => {
 
   useEffect(() => {
     load()
+    loadFavs()
   }, [])
 
   const onRefresh = () => {
@@ -121,11 +160,13 @@ const MotivationsScreen = ({ navigation }) => {
     load()
   }
 
-  const filters = ['all', 'scripture', 'encouragement', 'mindset']
+  const filters = ['all', 'scripture', 'encouragement', 'mindset', 'saved']
 
-  const filtered = activeFilter === 'all'
-    ? motivations
-    : motivations.filter((m) => m.category === activeFilter)
+  const filtered = activeFilter === 'saved'
+    ? motivations.filter((m) => favIds.has(m.id))
+    : activeFilter === 'all'
+      ? motivations
+      : motivations.filter((m) => m.category === activeFilter)
 
   return (
     <View style={styles.container}>
@@ -182,7 +223,14 @@ const MotivationsScreen = ({ navigation }) => {
               <Text style={styles.emptySubtext}>Check back soon for new inspiration.</Text>
             </View>
           ) : (
-            filtered.map((item) => <MotivationCard key={item.id} item={item} />)
+            filtered.map((item) => (
+              <MotivationCard
+                key={item.id}
+                item={item}
+                isFav={favIds.has(item.id)}
+                onToggleFav={toggleFav}
+              />
+            ))
           )}
         </ScrollView>
       )}
@@ -307,6 +355,20 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  actionBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+    backgroundColor: Colors.primary + '10',
+  },
+  actionBtnText: {
+    fontSize: 13,
+    color: Colors.primary,
+    fontWeight: '600',
   },
   empty: {
     alignItems: 'center',
