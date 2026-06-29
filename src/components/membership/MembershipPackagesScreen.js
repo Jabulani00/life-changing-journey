@@ -2,7 +2,7 @@
 import { Ionicons } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
 import React, { useMemo, useState } from 'react'
-import { Alert, Dimensions, Linking, ScrollView, Text, TouchableOpacity, View } from 'react-native'
+import { Alert, Dimensions, Linking, Platform, ScrollView, Text, TouchableOpacity, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { PLAN_DISPLAY_NAME, PLAN_ID } from '../../config/subscriptionConfig'
 import { useAuth } from '../../context/AuthContext'
@@ -56,6 +56,7 @@ export default function MembershipPackagesScreen() {
   const sub = useSubscription()
   const isGuest = user?.isAnonymous || !user
   const isDemoAdmin = user?.id === 'demo-admin'
+  const isIosStore = Platform.OS === 'ios'
 
   const [memberType, setMemberType] = useState('adults')
 
@@ -85,9 +86,13 @@ export default function MembershipPackagesScreen() {
             Life Changing Journey Packages
           </Text>
           <Text style={{ ...Typography.textStyles.bodySmall, color: Colors.textSecondary, marginBottom: 16 }}>
-            Once-off fees in ZAR. Compare plans side by side; purchase on the website to activate your tier.
+            {isIosStore
+              ? 'View your plan status and app benefits below. Membership is managed on our website with the same account email.'
+              : 'Once-off fees in ZAR. Compare plans side by side; purchase on the website to activate your tier.'}
           </Text>
 
+          {!isIosStore ? (
+          <>
           <Text style={{ ...Typography.textStyles.captionBold, color: Colors.textPrimary, marginBottom: 8 }}>
             Show prices for
           </Text>
@@ -117,6 +122,8 @@ export default function MembershipPackagesScreen() {
               </TouchableOpacity>
             ))}
           </View>
+          </>
+          ) : null}
 
           <View
             style={{
@@ -190,6 +197,7 @@ export default function MembershipPackagesScreen() {
               </Text>
             )}
 
+            {!isIosStore ? (
             <TouchableOpacity onPress={openWebPlans} activeOpacity={0.9} style={{ marginTop: 14 }}>
               <LinearGradient
                 colors={[Colors.primary, Colors.primaryLight]}
@@ -206,8 +214,28 @@ export default function MembershipPackagesScreen() {
                 </Text>
               </LinearGradient>
             </TouchableOpacity>
+            ) : (
+            <TouchableOpacity
+              onPress={openWebPlans}
+              activeOpacity={0.9}
+              style={{
+                marginTop: 14,
+                borderRadius: 12,
+                paddingVertical: 12,
+                alignItems: 'center',
+                borderWidth: 1,
+                borderColor: Colors.primary,
+              }}
+            >
+              <Text style={{ ...Typography.textStyles.button, color: Colors.primary }}>
+                Manage membership on website
+              </Text>
+            </TouchableOpacity>
+            )}
           </View>
 
+          {!isIosStore ? (
+          <>
           <Text style={{ ...Typography.textStyles.h5, color: Colors.textPrimary, marginBottom: 12 }}>
             Compare plans
           </Text>
@@ -282,6 +310,8 @@ export default function MembershipPackagesScreen() {
               </Text>
             </LinearGradient>
           </TouchableOpacity>
+          </>
+          ) : null}
 
           <TouchableOpacity onPress={openPublicSite} style={{ alignItems: 'center', marginTop: 12 }}>
             <Text style={{ ...Typography.textStyles.caption, color: Colors.info }}>

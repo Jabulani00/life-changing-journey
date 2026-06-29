@@ -249,8 +249,34 @@ eas build:list --platform ios --limit 5
 | 4.2.2 | Minimum functionality | Add interactive features (booking, check-in, RSVP) — DONE in Build 12 |
 | 2.3.8 | Placeholder icons | Ensure `assets/icon.png` is final branded 1024×1024 PNG |
 | 5.1.1 | Privacy policy missing | Add URL to App Store Connect listing |
+| 5.1.1(v) | Account deletion missing | Profile → Delete account (in-app); deploy `deleteAccount` Cloud Function |
 | 2.1 | App crashes | Test on device before submitting |
 
 ---
 
-*Last updated: June 23, 2026 — Build 29 submitted (fixes: legacy-peer-deps, react-native-webview, push notif prompt)*
+### Build 31 — Apple review fixes (code complete)
+
+| Field | Value |
+|-------|-------|
+| Version | 1.0.0 |
+| Build Number | 4 (`app.json`) |
+| Status | Ready for EAS build after `firebase deploy --only functions` |
+
+**Changes:**
+- P0 payments: read-only `SubscriptionScreen`; entitlements from `user_memberships` only; iOS-safe membership UI
+- P0 navigation: Connect tab My Bookings / Saved Words (replaces broken Bookmarks/Downloads)
+- P1: Health disclaimers on mood check-in + chat; privacy manifest DOB; branded splash (`docs/legal-assets/logo.png`)
+- Docs: `docs/APPLE_APP_REVIEW_ANALYSIS.md`, `docs/APP_REVIEW_DEMO_ACCOUNT.md`, `docs/APP_STORE_SCREENSHOTS.md`
+
+**Before submit:**
+```powershell
+firebase deploy --only functions
+npm start
+# Test Profile → Delete account on throwaway account
+eas build --platform ios --profile production
+eas submit --platform ios --latest
+```
+
+---
+
+*Last updated: June 29, 2026 — Build 31 Apple review remediation*

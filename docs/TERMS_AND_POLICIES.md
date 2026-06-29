@@ -515,13 +515,20 @@ Complaints may be directed to the Regulator if not resolved with us.
 
 ### 12.1 How to request deletion
 
-Email **info@lifechangingjourney.co.za** from your registered address with subject **“Account deletion request”** and include:
+**Primary method (in-app):**
+
+1. **Mobile App:** Open **Profile** → tap **Delete account** → confirm → enter your password.
+2. **Membership Web:** Open **Dashboard** → **Account settings** → **Delete account** → enter your password.
+
+Deletion is processed immediately. Your Firebase Authentication account, profile, and membership access are removed. Booking and contact records are anonymized where permitted; transaction records may be retained for tax and audit purposes (see §12.3).
+
+**Alternative (email):** If you cannot access the app, email **info@lifechangingjourney.co.za** from your registered address with subject **“Account deletion request”** and include:
 
 - Full name;
 - Registered email;
 - Whether you want **full deletion** or **anonymisation** of booking history.
 
-We will verify identity before processing.
+We will verify identity before processing email requests.
 
 ### 12.2 What we delete
 
@@ -538,7 +545,7 @@ We will verify identity before processing.
 
 ### 12.4 Store-specific deletion (Apple)
 
-Apple App Store users may also use **Account Deletion** requirements: provide an in-app path or web link. Recommended: Settings → Profile → “Delete account” linking to this process, or email flow above documented in App Store Connect notes.
+Apple App Store users can delete their account in-app: **Profile → Delete account** (mobile) or **Dashboard → Account settings → Delete account** (web). Email requests remain available as a fallback per §12.1.
 
 ---
 
@@ -620,7 +627,7 @@ Use this checklist before submitting to **Apple**, **Google**, and **Huawei**:
 - [ ] Google Play: Data safety + content rating + financial/health declarations
 - [ ] Huawei: User agreement + privacy URLs + permission justification
 - [ ] Privacy labels match real data flows (Firebase, Calendly, Stripe web, optional Gemini, push)
-- [ ] Account deletion process documented and accessible in-app
+- [x] Account deletion process documented and accessible in-app (Profile → Delete account; Dashboard on web)
 - [ ] Confirm production uses **Stripe** (not mock payments) on Membership Web
 - [ ] Tighten Firestore security rules for production (bookings/contacts currently permissive in dev rules)
 

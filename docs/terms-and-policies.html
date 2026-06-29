@@ -841,13 +841,19 @@
 </section>
 <section class="legal-section" id="12-account-deletion-data-requests"><h2>12. Account deletion &amp; data requests</h2>
 <h3>12.1 How to request deletion</h3>
-<p>Email <strong>info@lifechangingjourney.co.za</strong> from your registered address with subject <strong>“Account deletion request”</strong> and include:</p>
+<p><strong>Primary method (in-app):</strong></p>
+<ol class="legal-list">
+<li><strong>Mobile App:</strong> Open <strong>Profile</strong> → tap <strong>Delete account</strong> → confirm → enter your password.</li>
+<li><strong>Membership Web:</strong> Open <strong>Dashboard</strong> → <strong>Account settings</strong> → <strong>Delete account</strong> → enter your password.</li>
+</ol>
+<p>Deletion is processed immediately. Your Firebase Authentication account, profile, and membership access are removed. Booking and contact records are anonymized where permitted; transaction records may be retained for tax and audit purposes (see §12.3).</p>
+<p><strong>Alternative (email):</strong> If you cannot access the app, email <strong>info@lifechangingjourney.co.za</strong> from your registered address with subject <strong>“Account deletion request”</strong> and include:</p>
 <ul class="legal-list">
 <li>Full name;</li>
 <li>Registered email;</li>
 <li>Whether you want <strong>full deletion</strong> or <strong>anonymisation</strong> of booking history.</li>
 </ul>
-<p>We will verify identity before processing.</p>
+<p>We will verify identity before processing email requests.</p>
 <h3>12.2 What we delete</h3>
 <ul class="legal-list">
 <li>Firebase Authentication user (where technically feasible);</li>
@@ -862,7 +868,7 @@
 <li>Aggregated, non-identifying analytics.</li>
 </ul>
 <h3>12.4 Store-specific deletion (Apple)</h3>
-<p>Apple App Store users may also use <strong>Account Deletion</strong> requirements: provide an in-app path or web link. Recommended: Settings → Profile → “Delete account” linking to this process, or email flow above documented in App Store Connect notes.</p>
+<p>Apple App Store users can delete their account in-app: <strong>Profile → Delete account</strong> (mobile) or <strong>Dashboard → Account settings → Delete account</strong> (web). Email requests remain available as a fallback per §12.1.</p>
 </section>
 <section class="legal-section" id="13-intellectual-property"><h2>13. Intellectual property</h2>
 <ul class="legal-list">
@@ -879,7 +885,7 @@
 <li><strong>Terms of Use (EULA):</strong> Link to the same URL, or use standard Apple EULA and reference this document in the app description</li>
 <li><strong>Account deletion:</strong> Required for apps with account creation — implement link per Section 12</li>
 <li><strong>App Privacy labels:</strong> Declare contact info, identifiers, user content, purchase history, and other data per actual collection (Firebase, Stripe redirect, Calendly, notifications)</li>
-<li><strong>Permissions declared</strong> (<code>app.json</code>): phone, camera, photo library, location when in use — align Privacy Nutrition Labels with actual use</li>
+<li><strong>Permissions declared</strong> (<code>app.json</code>): network and notifications only — align Privacy Nutrition Labels with actual use</li>
 </ul>
 <h3>14.2 Google Play</h3>
 <ul class="legal-list">
@@ -918,7 +924,7 @@
 <li>[ ] Google Play: Data safety + content rating + financial/health declarations</li>
 <li>[ ] Huawei: User agreement + privacy URLs + permission justification</li>
 <li>[ ] Privacy labels match real data flows (Firebase, Calendly, Stripe web, optional Gemini, push)</li>
-<li>[ ] Account deletion process documented and accessible in-app</li>
+<li>[x] Account deletion process documented and accessible in-app (Profile → Delete account; Dashboard on web)</li>
 <li>[ ] Confirm production uses <strong>Stripe</strong> (not mock payments) on Membership Web</li>
 <li>[ ] Tighten Firestore security rules for production (bookings/contacts currently permissive in dev rules)</li>
 </ul>

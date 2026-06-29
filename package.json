@@ -3,11 +3,11 @@
   "main": "index.js",
   "version": "1.0.0",
   "scripts": {
-    "start": "expo start",
+    "start": "node ./scripts/expo-start.cjs",
     "reset-project": "node ./scripts/reset-project.js",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
-    "web": "expo start --web",
+    "android": "node ./scripts/expo-start.cjs --android",
+    "ios": "node ./scripts/expo-start.cjs --ios",
+    "web": "node ./scripts/expo-start.cjs --web",
     "lint": "expo lint"
   },
   "dependencies": {

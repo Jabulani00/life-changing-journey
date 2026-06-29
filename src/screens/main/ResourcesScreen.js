@@ -1,6 +1,6 @@
 // Connect Screen - Life Changing Journey social links hub (renamed from Resources)
 import React, { useState, useEffect } from 'react'
-import { View, Text, ScrollView, TouchableOpacity, TextInput, Linking, Image } from 'react-native'
+import { View, Text, ScrollView, TouchableOpacity, TextInput, Linking, Image, Alert } from 'react-native'
 import UpgradePromptModal from '../../components/subscription/UpgradePromptModal'
 import { PLAN_ID } from '../../config/subscriptionConfig'
 import { useSubscription } from '../../hooks/useSubscription'
@@ -142,7 +142,15 @@ const ResourcesScreen = ({ navigation }) => {
                 resource={resource}
                 variant="featured"
                 onPress={() => {
-                  // Handle resource access
+                  Alert.alert(
+                    resource.title,
+                    `${resource.content}\n\nBook a session or contact our team for full access to member resources.`,
+                    [
+                      { text: 'Contact', onPress: () => navigation.navigate('Contact') },
+                      { text: 'Book', onPress: () => navigation.navigate('Booking') },
+                      { text: 'Close', style: 'cancel' },
+                    ]
+                  )
                 }}
               />
             </View>
@@ -715,15 +723,15 @@ const ResourcesScreen = ({ navigation }) => {
               borderWidth: 1,
               borderColor: Colors.lightGray,
             }}
-            onPress={() => navigation.navigate('Bookmarks')}
+            onPress={() => navigation.navigate('MyBookings')}
             activeOpacity={0.95}
           >
-            <Ionicons name="bookmark-outline" size={24} color={Colors.primary} style={{ marginBottom: 8 }} />
+            <Ionicons name="calendar-outline" size={24} color={Colors.primary} style={{ marginBottom: 8 }} />
             <Text style={{
               ...Typography.textStyles.captionBold,
               color: Colors.textPrimary,
             }}>
-              Bookmarks
+              My Bookings
             </Text>
           </TouchableOpacity>
           
@@ -737,15 +745,15 @@ const ResourcesScreen = ({ navigation }) => {
               borderWidth: 1,
               borderColor: Colors.lightGray,
             }}
-            onPress={() => navigation.navigate('Downloads')}
+            onPress={() => navigation.navigate('Motivations')}
             activeOpacity={0.95}
           >
-            <Ionicons name="download-outline" size={24} color={Colors.primary} style={{ marginBottom: 8 }} />
+            <Ionicons name="heart-outline" size={24} color={Colors.primary} style={{ marginBottom: 8 }} />
             <Text style={{
               ...Typography.textStyles.captionBold,
               color: Colors.textPrimary,
             }}>
-              Downloads
+              Saved Words
             </Text>
           </TouchableOpacity>
         </View>

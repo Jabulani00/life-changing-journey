@@ -95,18 +95,24 @@ APP REVIEW NOTES:
 This app is a client portal. Reviewers should sign in to see full functionality.
 
 DEMO ACCOUNT:
-Email: [your-demo@lifechangingjourney.co.za]
-Password: [your-demo-password]
+Email: reviewer@lifechangingjourney.co.za
+Password: [CREATE BEFORE SUBMIT — see docs/APP_REVIEW_DEMO_ACCOUNT.md]
 
 HOW TO USE:
 1. Open the app and sign in with the demo account above.
-2. From the main tabs, use "Booking" to submit a session request (service, date, time).
-3. Use "Profile" to view account and engagement.
-4. "Services" and "Resources" show available offerings; contact options work in-app.
+2. From Home, use "Book Appointment" to submit a session request (service, date, time).
+3. Use Profile tab to view account, bookings, and legal policies.
+4. Services and Resources show offerings; contact options (phone, email, WhatsApp) work in-app.
 
-The app provides ongoing value through user accounts, in-app request/booking, and profile management — not only informational content.
+ACCOUNT DELETION (Apple Guideline 5.1.1):
+Profile → Delete account → confirm → enter password.
+Deletion removes the Firebase Auth account, profile, and membership. Transaction records may be retained per our Privacy Policy: https://www.lifechangingjourney.co.za/legal/terms-and-policies
 
-No additional credentials required.
+MEMBERSHIP: Purchased on our website; the iOS app shows plan status and entitlements only. No in-app purchase on iOS.
+
+NOT IN THIS BUILD: Push notifications (disabled on iOS). Donate tab hidden.
+
+See also: docs/APPLE_APP_REVIEW_ANALYSIS.md and docs/APP_STORE_SCREENSHOTS.md
 ```
 
 *(Replace the demo email and password with a real test account you create.)*
@@ -183,7 +189,9 @@ This is your main sales pitch. Write a compelling description that:
 4. **How It Works**
 5. **Call to Action**
 
-**Complete App Description for Life Changing Journey:**
+**⚠️ Do not submit the legacy description below.** It says "no login required" and conflicts with the client-portal build (`EXPO_PUBLIC_ENABLE_AUTH=true`). Use section **3️⃣ Apple-Safe App Description** only.
+
+**Complete App Description for Life Changing Journey (LEGACY — do not submit):**
 ```
 Welcome to Life Changing Journey – your comprehensive gateway to wellness transformation and holistic personal development in South Africa.
 
@@ -361,10 +369,14 @@ If your app requires sign-in, you must provide Apple with:
 - **Notes:** Explain how to navigate the app, any special features, or demo account details
 
 **For Life Changing Journey:**
-Since your app is a directory gateway that doesn't require login, use this:
+
+Use the **App Review Notes** in section **4️⃣** above and [docs/APPLE_APP_REVIEW_ANALYSIS.md](docs/APPLE_APP_REVIEW_ANALYSIS.md). Sign-in is **required** for booking and profile features.
+
+<details>
+<summary>Archived legacy notes (directory / no login — do not use)</summary>
 
 ```
-APP REVIEW NOTES:
+APP REVIEW NOTES (ARCHIVED):
 
 This app is a directory gateway for wellness services and does not require 
 user authentication or login. All features are fully accessible without 
@@ -378,22 +390,12 @@ HOW TO USE THE APP:
 5. Navigate to "Resources" tab for educational content and social media links
 6. Use "Contact" tab to reach our main office
 
-KEY FEATURES TO TEST:
-- Service directory browsing (Services tab)
-- Service detail pages with provider information
-- Direct contact options (phone, WhatsApp, email)
-- Resources section with educational content
-- Social media links (Facebook, Instagram, YouTube, TikTok)
-- Contact form (Contact tab)
-
-All contact features work without authentication. The app serves as a 
-directory and contact gateway connecting users with wellness service 
-providers in South Africa.
-
 No login credentials required for App Review.
 ```
 
-**If login is required:**
+</details>
+
+**If login is required (current build):**
 ```
 Demo Account:
 Username: [demo@example.com]

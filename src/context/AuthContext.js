@@ -5,6 +5,8 @@ import {
   getUserProfileFromFirestore,
   isAdmin as checkFirebaseAdmin,
   registerWithEmailAndPassword,
+  reauthenticateUser,
+  deleteAccountViaFunction,
   resetPasswordWithEmail,
   signInWithEmail,
   signOutFirebase,
@@ -310,6 +312,48 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
+  const canDeleteAccount =
+    user &&
+    !user.isAnonymous &&
+    user.id !== 'anonymous-user' &&
+    user.id !== 'demo-admin' &&
+    !session?.isDemoAdmin &&
+    (user.uid || (user.id && user.id !== 'demo-admin'))
+
+  const deleteAccount = async (password) => {
+    if (!canDeleteAccount) {
+      return { data: null, error: new Error('This account cannot be deleted from the app.') }
+    }
+    if (!password?.trim()) {
+      return { data: null, error: new Error('Password is required to confirm account deletion.') }
+    }
+    try {
+      setLoading(true)
+      await reauthenticateUser(password)
+      const data = await deleteAccountViaFunction()
+      if (enableAuth && isSupabaseConfigured) {
+        await supabase.auth.signOut().catch(() => {})
+      }
+      await AsyncStorage.removeItem(DEMO_ADMIN_STORAGE_KEY)
+      setSession(null)
+      setUser(null)
+      setAdmin(false)
+      setMembership(null)
+      try {
+        await signOutFirebase()
+      } catch (_) {}
+      return { data, error: null }
+    } catch (error) {
+      const message =
+        error?.message ||
+        error?.details ||
+        'Could not delete your account. Please try again or contact support.'
+      return { data: null, error: { ...error, message } }
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const effectivePlanId = getEffectivePlanId(membership)
   const entitlements = mapPlanToEntitlements(effectivePlanId)
 
@@ -329,6 +373,8 @@ export const AuthProvider = ({ children }) => {
     resetPassword,
     updateProfile,
     getUserProfile,
+    deleteAccount,
+    canDeleteAccount,
   }
 
   return (

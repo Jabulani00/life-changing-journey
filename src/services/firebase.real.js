@@ -5,8 +5,10 @@
 import { getApp, initializeApp } from 'firebase/app'
 import {
   createUserWithEmailAndPassword,
+  EmailAuthProvider,
   getAuth as getFirebaseAuth,
   onAuthStateChanged,
+  reauthenticateWithCredential,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
@@ -26,6 +28,7 @@ import {
   updateDoc,
   where,
 } from 'firebase/firestore'
+import { getFunctions, httpsCallable } from 'firebase/functions'
 import { firebaseConfig } from './firebaseConfig'
 
 let _app = null
@@ -57,7 +60,7 @@ function getAuth() {
   return _auth
 }
 
-export { getDb, getAuth }
+export { getDb, getAuth, getFirebaseApp }
 
 export const COLLECTIONS = {
   BOOKINGS: 'bookings',
@@ -550,4 +553,23 @@ export async function updateUserProfileInFirestore(uid, updates) {
   if (updates.isAdmin !== undefined) allowed.isAdmin = updates.isAdmin
   if (updates.notificationTier !== undefined) allowed.notificationTier = updates.notificationTier
   await updateDoc(ref, allowed)
+}
+
+/** Re-authenticate the current user with their password (required before account deletion). */
+export async function reauthenticateUser(password) {
+  const auth = getAuth()
+  const user = auth.currentUser
+  if (!user?.email) {
+    throw new Error('You must be signed in with email and password to delete your account.')
+  }
+  const credential = EmailAuthProvider.credential(user.email, password)
+  await reauthenticateWithCredential(user, credential)
+}
+
+/** Permanently delete the signed-in account via the deleteAccount Cloud Function. */
+export async function deleteAccountViaFunction() {
+  const functions = getFunctions(getFirebaseApp())
+  const callable = httpsCallable(functions, 'deleteAccount')
+  const result = await callable()
+  return result.data
 }

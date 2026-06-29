@@ -304,7 +304,7 @@ const ChatbotScreen = ({ navigation }) => {
           </View>
           <View>
             <Text style={styles.headerTitle}>LCJ Assistant</Text>
-            <Text style={styles.headerSubtitle}>Always here to help</Text>
+            <Text style={styles.headerSubtitle}>FAQ & navigation help</Text>
           </View>
         </View>
         <View style={{ width: 40 }} />
@@ -345,6 +345,10 @@ const ChatbotScreen = ({ navigation }) => {
             )}
           />
         </View>
+
+        <Text style={styles.disclaimer}>
+          General information only — not medical or crisis support. Emergency: 112. SA crisis line: 0800 567 567.
+        </Text>
 
         {/* Input Bar */}
         <View style={[styles.inputBar, { paddingBottom: Math.max(insets.bottom, 12) }]}>
@@ -515,6 +519,14 @@ const styles = StyleSheet.create({
   },
   sendBtnDisabled: {
     backgroundColor: '#D1D5DB',
+  },
+  disclaimer: {
+    fontSize: 11,
+    lineHeight: 15,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+    paddingHorizontal: 16,
+    paddingBottom: 6,
   },
 })
 

@@ -525,6 +525,9 @@ const HomeScreen = ({ navigation }) => {
                 )
               })}
             </View>
+            <Text style={{ fontSize: 11, color: Colors.textLight, marginTop: 10, lineHeight: 15 }}>
+              For wellness reflection only — not medical advice. In crisis call 112 or 0800 567 567.
+            </Text>
             {moodSaved && (
               <TouchableOpacity
                 onPress={() => navigation.navigate('Chatbot')}
@@ -532,7 +535,7 @@ const HomeScreen = ({ navigation }) => {
               >
                 <Ionicons name="chatbubble-ellipses-outline" size={16} color={Colors.primary} />
                 <Text style={{ fontSize: 13, color: Colors.primary, fontWeight: '600', marginLeft: 6 }}>
-                  Talk to our AI Wellness Coach
+                  Talk to LCJ Assistant
                 </Text>
               </TouchableOpacity>
             )}

@@ -7,6 +7,7 @@
  */
 const functions = require('firebase-functions')
 const admin = require('firebase-admin')
+const { deleteUserData, isUserAdmin } = require('./lib/deleteUserData')
 
 if (!admin.apps.length) {
   admin.initializeApp()
@@ -156,5 +157,41 @@ exports.calendlyWebhook = functions.https.onRequest(async (req, res) => {
   } catch (e) {
     console.error(e)
     res.status(500).json({ error: e?.message || 'error' })
+  }
+})
+
+/**
+ * Callable: permanently delete the authenticated user's account and associated data.
+ * Client must re-authenticate before calling (Firebase Auth recent sign-in).
+ */
+exports.deleteAccount = functions.https.onCall(async (_data, context) => {
+  if (!context.auth?.uid) {
+    throw new functions.https.HttpsError('unauthenticated', 'You must be signed in to delete your account.')
+  }
+
+  const uid = context.auth.uid
+  const email = context.auth.token?.email || null
+
+  if (await isUserAdmin(db, uid, email)) {
+    throw new functions.https.HttpsError(
+      'permission-denied',
+      'Admin accounts cannot be deleted through the app. Contact support.'
+    )
+  }
+
+  try {
+    await deleteUserData(db, uid, email)
+    await admin.auth().deleteUser(uid)
+    return {
+      success: true,
+      message:
+        'Your account has been deleted. Some transaction records may be retained as required by law.',
+    }
+  } catch (e) {
+    console.error('deleteAccount failed', uid, e)
+    throw new functions.https.HttpsError(
+      'internal',
+      e?.message || 'Account deletion failed. Please try again or contact support.'
+    )
   }
 })

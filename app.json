@@ -12,12 +12,12 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.lifechangingjourney.app",
-      "buildNumber": "2",
+      "buildNumber": "4",
       "deploymentTarget": "13.4",
       "requireFullScreen": false,
       "icon": "./assets/icon.png",
       "splash": {
-        "image": "./assets/images/splash-icon.png",
+        "image": "./docs/legal-assets/logo.png",
         "resizeMode": "contain",
         "backgroundColor": "#ffffff",
         "dark": {
@@ -25,10 +25,6 @@
         }
       },
       "infoPlist": {
-        "NSPhoneUsageDescription": "This app needs access to make phone calls to contact our wellness services.",
-        "NSCameraUsageDescription": "This app needs camera access for profile photos and service documentation.",
-        "NSPhotoLibraryUsageDescription": "This app needs photo library access to select images for your profile.",
-        "NSLocationWhenInUseUsageDescription": "This app uses your location to help you find nearby wellness services.",
         "LSApplicationQueriesSchemes": [
           "tel",
           "mailto",
@@ -41,6 +37,58 @@
         "UIStatusBarStyle": "UIStatusBarStyleDefault",
         "CFBundleDisplayName": "Life Changing Journey",
         "CFBundleName": "Life Changing Journey"
+      },
+      "privacyManifests": {
+        "NSPrivacyCollectedDataTypes": [
+          {
+            "NSPrivacyCollectedDataType": "NSPrivacyCollectedDataTypeEmailAddress",
+            "NSPrivacyCollectedDataTypeLinked": true,
+            "NSPrivacyCollectedDataTypeTracking": false,
+            "NSPrivacyCollectedDataTypePurposes": [
+              "NSPrivacyCollectedDataTypePurposeAppFunctionality"
+            ]
+          },
+          {
+            "NSPrivacyCollectedDataType": "NSPrivacyCollectedDataTypeName",
+            "NSPrivacyCollectedDataTypeLinked": true,
+            "NSPrivacyCollectedDataTypeTracking": false,
+            "NSPrivacyCollectedDataTypePurposes": [
+              "NSPrivacyCollectedDataTypePurposeAppFunctionality"
+            ]
+          },
+          {
+            "NSPrivacyCollectedDataType": "NSPrivacyCollectedDataTypePhoneNumber",
+            "NSPrivacyCollectedDataTypeLinked": true,
+            "NSPrivacyCollectedDataTypeTracking": false,
+            "NSPrivacyCollectedDataTypePurposes": [
+              "NSPrivacyCollectedDataTypePurposeAppFunctionality"
+            ]
+          },
+          {
+            "NSPrivacyCollectedDataType": "NSPrivacyCollectedDataTypeUserID",
+            "NSPrivacyCollectedDataTypeLinked": true,
+            "NSPrivacyCollectedDataTypeTracking": false,
+            "NSPrivacyCollectedDataTypePurposes": [
+              "NSPrivacyCollectedDataTypePurposeAppFunctionality"
+            ]
+          },
+          {
+            "NSPrivacyCollectedDataType": "NSPrivacyCollectedDataTypeOtherUserContactInfo",
+            "NSPrivacyCollectedDataTypeLinked": true,
+            "NSPrivacyCollectedDataTypeTracking": false,
+            "NSPrivacyCollectedDataTypePurposes": [
+              "NSPrivacyCollectedDataTypePurposeAppFunctionality"
+            ]
+          }
+        ],
+        "NSPrivacyAccessedAPITypes": [
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
+            "NSPrivacyAccessedAPITypeReasons": [
+              "CA92.1"
+            ]
+          }
+        ]
       },
       "config": {
         "usesNonExemptEncryption": false
@@ -92,7 +140,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "./docs/legal-assets/logo.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff",

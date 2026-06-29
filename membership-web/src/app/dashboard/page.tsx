@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { signOut } from "firebase/auth";
-import { FiCalendar, FiClock, FiGrid, FiLogOut, FiUser } from "react-icons/fi";
+import { EmailAuthProvider, reauthenticateWithCredential, signOut } from "firebase/auth";
+import { FiCalendar, FiClock, FiGrid, FiLogOut, FiTrash2, FiUser } from "react-icons/fi";
 import { firebaseAuth } from "@/lib/firebase-client-auth";
+
+const LEGAL_URL = "https://www.lifechangingjourney.co.za/legal/terms-and-policies";
 
 type EntitlementsResponse = {
   userId: string;
@@ -40,6 +42,9 @@ export default function DashboardPage() {
   const [email, setEmail] = useState("");
   const [data, setData] = useState<EntitlementsResponse | null>(null);
   const [error, setError] = useState("");
+  const [deletePassword, setDeletePassword] = useState("");
+  const [deleting, setDeleting] = useState(false);
+  const [deleteMessage, setDeleteMessage] = useState("");
 
   useEffect(() => {
     async function load() {
@@ -66,6 +71,53 @@ export default function DashboardPage() {
     await fetch("/api/auth/logout", { method: "POST" });
     await signOut(firebaseAuth).catch(() => {});
     window.location.href = "/";
+  }
+
+  async function deleteAccount() {
+    setDeleteMessage("");
+    if (!deletePassword.trim()) {
+      setDeleteMessage("Enter your password to confirm account deletion.");
+      return;
+    }
+
+    const user = firebaseAuth.currentUser;
+    if (!user?.email) {
+      setDeleteMessage("Sign in with email and password to delete your account.");
+      return;
+    }
+
+    if (
+      !window.confirm(
+        "This permanently deletes your account and membership access. Booking history will be anonymized. Transaction records may be retained as required by law. Continue?"
+      )
+    ) {
+      return;
+    }
+
+    setDeleting(true);
+    try {
+      await reauthenticateWithCredential(
+        user,
+        EmailAuthProvider.credential(user.email, deletePassword)
+      );
+      const idToken = await user.getIdToken(true);
+      const res = await fetch("/api/account/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idToken }),
+      });
+      const payload = (await res.json()) as { error?: string; message?: string };
+      if (!res.ok) {
+        throw new Error(payload.error || "Account deletion failed.");
+      }
+      await fetch("/api/auth/logout", { method: "POST" });
+      await signOut(firebaseAuth).catch(() => {});
+      window.location.href = "/?deleted=1";
+    } catch (err) {
+      setDeleteMessage(err instanceof Error ? err.message : "Could not delete account.");
+    } finally {
+      setDeleting(false);
+    }
   }
 
   return (
@@ -206,6 +258,43 @@ export default function DashboardPage() {
                 </span>
               </div>
             ))}
+          </div>
+
+          <div style={{ marginTop: "1.5rem", paddingTop: "1.25rem", borderTop: "1px solid var(--border)" }}>
+            <div className="ent-title">Account settings</div>
+            <p className="muted" style={{ fontSize: "0.88rem", margin: "0.5rem 0 1rem" }}>
+              Permanently delete your account and associated data. See our{" "}
+              <a href={LEGAL_URL} target="_blank" rel="noopener noreferrer">
+                Privacy Policy
+              </a>{" "}
+              for retention details.
+            </p>
+            <label htmlFor="delete-password" className="muted" style={{ fontSize: "0.82rem" }}>
+              Confirm with password
+            </label>
+            <input
+              id="delete-password"
+              type="password"
+              className="input"
+              value={deletePassword}
+              onChange={(e) => setDeletePassword(e.target.value)}
+              placeholder="Your password"
+              autoComplete="current-password"
+              style={{ marginTop: "0.35rem", marginBottom: "0.75rem", width: "100%" }}
+            />
+            {deleteMessage ? (
+              <p style={{ color: "#b42318", fontSize: "0.85rem", marginBottom: "0.75rem" }}>{deleteMessage}</p>
+            ) : null}
+            <button
+              type="button"
+              className="btn btn-outline"
+              onClick={deleteAccount}
+              disabled={deleting}
+              style={{ color: "#b42318", borderColor: "#fecdca", width: "100%" }}
+            >
+              <FiTrash2 />
+              {deleting ? "Deleting…" : "Delete account"}
+            </button>
           </div>
         </aside>
       </section>

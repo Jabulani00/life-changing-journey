@@ -23,12 +23,12 @@ Use this checklist before submitting your app to the App Store.
 
 ## ✅ Permissions & Privacy
 
-- [x] Phone usage description added
-- [x] Camera usage description added (if used)
-- [x] Photo library usage description added (if used)
-- [x] Location usage description added (if used)
+- [x] Unused camera, photo, location, and phone Info.plist keys removed (app uses `tel:` links only)
 - [x] Privacy policy URL in app config: `https://www.lifechangingjourney.co.za/legal/terms-and-policies`
 - [x] First-install terms acceptance gate implemented (`TermsAcceptanceScreen`)
+- [x] Privacy Policy & Terms link on Profile screen
+- [x] In-app account deletion on Profile screen (Apple Guideline 5.1.1)
+- [x] iOS privacy manifest entries in `app.json` (`privacyManifests`)
 
 ## ✅ URL Schemes
 
@@ -71,6 +71,8 @@ Use this checklist before submitting your app to the App Store.
 - [ ] Test network connectivity handling
 - [ ] Test error scenarios
 - [ ] Test first-install terms acceptance flow
+- [ ] Test in-app account deletion (Profile → Delete account) on a test account
+- [ ] Deploy Cloud Function: `firebase deploy --only functions` (deleteAccount callable)
 - [ ] Test push notifications (physical device + EAS/dev build; configure APNs via `eas credentials`)
 - [ ] Test notification tap opens Events / Motivations / Live
 

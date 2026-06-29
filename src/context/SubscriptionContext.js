@@ -124,19 +124,17 @@ export function SubscriptionProvider({ children }) {
 
   const plan = useMemo(() => {
     if (!uid || isGuest || isDemo) return null
-    const fromMem = getEffectivePlanId(membership)
-    if (fromMem) return fromMem
-    const fp = profile?.plan
-    if (fp === PLAN_ID.SILVER || fp === PLAN_ID.GOLD || fp === PLAN_ID.PLATINUM) return fp
-    return PLAN_ID.SILVER
-  }, [uid, isGuest, isDemo, membership, profile])
+    return getEffectivePlanId(membership)
+  }, [uid, isGuest, isDemo, membership])
 
   useEffect(() => {
     if (!uid || isGuest || isDemo) return
-    if (plan === lastMergedPlan.current) return
-    lastMergedPlan.current = plan
-    mergeUserPlanField(uid, plan ?? null).catch(() => {})
-  }, [uid, isGuest, isDemo, plan])
+    const fromMem = getEffectivePlanId(membership)
+    if (!fromMem) return
+    if (fromMem === lastMergedPlan.current) return
+    lastMergedPlan.current = fromMem
+    mergeUserPlanField(uid, fromMem).catch(() => {})
+  }, [uid, isGuest, isDemo, membership])
 
   const value = useMemo(() => {
     const flags = deriveBooleans(plan)

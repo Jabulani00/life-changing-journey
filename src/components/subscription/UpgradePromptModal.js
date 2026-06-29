@@ -22,7 +22,7 @@ export default function UpgradePromptModal({ visible, onClose, suggestedPlan, me
 
   const goPlans = () => {
     onClose()
-    navigation?.navigate?.('Subscription')
+    navigation?.navigate?.('MembershipPackages')
   }
 
   return (

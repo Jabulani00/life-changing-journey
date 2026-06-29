@@ -1,12 +1,14 @@
 // Main App Component - Life Changing Journey
 import NetInfo from '@react-native-community/netinfo'
 import React from 'react'
-import { ActivityIndicator, LogBox, Platform, StatusBar, View } from 'react-native'
+import { ActivityIndicator, LogBox, Platform, View } from 'react-native'
+import { StatusBar } from 'expo-status-bar'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import CustomSplashScreen from './src/components/common/CustomSplashScreen'
 import NetworkStatusBar from './src/components/common/NetworkStatusBar'
 import ErrorBoundary from './src/components/ErrorBoundary'
 import { AuthProvider } from './src/context/AuthContext'
+import { SubscriptionProvider } from './src/context/SubscriptionContext'
 import AppNavigator from './src/navigation/AppNavigator'
 import TermsAcceptanceScreen from './src/screens/legal/TermsAcceptanceScreen'
 import { DataProvider } from './src/providers/DataProvider'
@@ -128,14 +130,16 @@ export default function App() {
           
           <FontLoader onReady={() => setFontsReady(true)}>
             <AuthProvider>
-              <DataProvider>
-                {!showSplash && (
-                  <AppContent
-                    termsAccepted={termsAccepted}
-                    onTermsAccepted={() => setTermsAccepted(true)}
-                  />
-                )}
-              </DataProvider>
+              <SubscriptionProvider>
+                <DataProvider>
+                  {!showSplash && (
+                    <AppContent
+                      termsAccepted={termsAccepted}
+                      onTermsAccepted={() => setTermsAccepted(true)}
+                    />
+                  )}
+                </DataProvider>
+              </SubscriptionProvider>
             </AuthProvider>
           </FontLoader>
         </NetworkProvider>
