@@ -6,6 +6,49 @@ Tracks every App Store build and submission with dates, build numbers, outcomes,
 
 ## Submission History
 
+### Build 33 — SUBMITTED (June 29, 2026)
+
+| Field | Value |
+|-------|-------|
+| Version | 1.0.0 |
+| Build Number | 33 |
+| EAS Build ID | `2eec148d-9d06-421d-8ddd-43a9eac162ae` |
+| EAS Submission ID | `4b676595-ea25-47e6-af3f-79dda63fcd3e` |
+| Commit | `0d9ff8f` |
+| Build Date | June 29, 2026 |
+| Status | 🔄 Submitted — processing on App Store Connect |
+| Apple Team ID | 4B3H2MM88X |
+| Apple ID | lifechangingjourney84@gmail.com |
+| ASC App ID | 6755474250 |
+
+**Build Log:** https://expo.dev/accounts/jabumb/projects/life-changing-journey/builds/2eec148d-9d06-421d-8ddd-43a9eac162ae  
+**IPA Artifact:** https://expo.dev/artifacts/eas/UwHUQyVVgS5rbvPZw40jcn9KwuoQEMAch_DbQGRG4Hs.ipa  
+**Submission:** https://expo.dev/accounts/jabumb/projects/life-changing-journey/submissions/4b676595-ea25-47e6-af3f-79dda63fcd3e  
+**TestFlight:** https://appstoreconnect.apple.com/apps/6755474250/testflight/ios
+
+**Changes (Apple review remediation — Build 31 code):**
+- P0 payments: read-only `SubscriptionScreen`; entitlements from `user_memberships` only; iOS-safe membership UI
+- P0 navigation: Connect tab My Bookings / Saved Words (replaces broken Bookmarks/Downloads)
+- P0 account deletion: Profile → Delete account (requires `firebase deploy --only functions`)
+- P1: Health disclaimers on mood check-in + chat; privacy manifest DOB; branded splash
+- `SubscriptionProvider` fix in `App.js`
+
+**Commands used:**
+
+```powershell
+eas build --platform ios --profile production --non-interactive
+eas submit --platform ios --latest --non-interactive
+```
+
+**Note:** `scripts/eas-prompt-patch.cjs` caused early exit during credential setup; use plain `eas` CLI for builds.
+
+**Before selecting build in App Store Connect:**
+1. Deploy `deleteAccount` Cloud Function: `firebase deploy --only functions`
+2. Create demo account per `docs/APP_REVIEW_DEMO_ACCOUNT.md`
+3. Paste review notes from `docs/APPLE_APP_REVIEW_ANALYSIS.md` into App Review Information
+
+---
+
 ### Build 11 — REJECTED (June 2026)
 
 | Field | Value |
@@ -254,29 +297,4 @@ eas build:list --platform ios --limit 5
 
 ---
 
-### Build 31 — Apple review fixes (code complete)
-
-| Field | Value |
-|-------|-------|
-| Version | 1.0.0 |
-| Build Number | 4 (`app.json`) |
-| Status | Ready for EAS build after `firebase deploy --only functions` |
-
-**Changes:**
-- P0 payments: read-only `SubscriptionScreen`; entitlements from `user_memberships` only; iOS-safe membership UI
-- P0 navigation: Connect tab My Bookings / Saved Words (replaces broken Bookmarks/Downloads)
-- P1: Health disclaimers on mood check-in + chat; privacy manifest DOB; branded splash (`docs/legal-assets/logo.png`)
-- Docs: `docs/APPLE_APP_REVIEW_ANALYSIS.md`, `docs/APP_REVIEW_DEMO_ACCOUNT.md`, `docs/APP_STORE_SCREENSHOTS.md`
-
-**Before submit:**
-```powershell
-firebase deploy --only functions
-npm start
-# Test Profile → Delete account on throwaway account
-eas build --platform ios --profile production
-eas submit --platform ios --latest
-```
-
----
-
-*Last updated: June 29, 2026 — Build 31 Apple review remediation*
+*Last updated: June 29, 2026 — Build 33 submitted to App Store Connect*
